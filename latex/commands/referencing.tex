@@ -1,0 +1,109 @@
+% !TEX root = ../ecc.tex
+
+\newcommand{\chp}[2]{
+    \providecommand{\curchp}{}
+    \renewcommand{\curchp}{#2}
+    \chapter{#1}
+    \label{chp:#2}
+    \input{contents/#2.tex}
+}
+
+\renewcommand{\sec}[2]{
+    \section{#1}
+    \label{sec:#2}
+    \input{contents/\curchp/#2.tex}
+}
+
+\newcommand{\sbs}[2]{
+    \subsection{#1}
+    \label{sbs:#2}
+}
+
+\newcommand{\sss}[2]{
+    \subsubsection{#1}
+    \label{sss:#2}
+}
+
+\newenvironment{fig}[2]{
+    \begin{figure}[H]
+    \newcommand{\figcaption}{#1}
+    \newcommand{\figlabel}{fig:#2}
+}{
+    \caption{\figcaption}
+    \label{\figlabel}
+    \end{figure}
+}
+
+\newenvironment{tab}[2]{
+    \begin{table}[H]
+    \newcommand{\tabcaption}{#1}
+    \newcommand{\tablabel}{fig:#2}
+}{
+    \caption{\tabcaption}
+    \label{\tablabel}
+    \end{table}
+}
+
+\newenvironment{thm}[2]{
+    \begin{theorem}[#1]
+    \label{thm:#2}
+}{
+    \end{theorem}
+}
+
+\newenvironment{lem}[2]{
+    \begin{lemma}[#1]
+    \label{lem:#2}
+}{
+    \end{lemma}
+}
+
+\newenvironment{cor}[2]{
+    \begin{corollary}[#1]
+    \label{cor:#2}
+}{
+    \end{corollary}
+}
+
+\newenvironment{dfn}[2]{
+    \begin{definition}[#1]
+    \label{dfn:#2}
+}{
+    \end{definition}
+}
+
+\newenvironment{exm}[2]{
+    \begin{example}[#1]
+    \label{exm:#2}
+}{
+    \end{example}
+}
+
+\newenvironment{rmk}[2]{
+    \begin{remark}[#1]
+    \label{rmk:#2}
+}{
+    \end{remark}
+}
+
+\newenvironment{alg}[2]{
+    \begin{algorithm}
+    \caption{#1}
+    \label{alg:#2}
+}{
+    \end{algorithm}
+}
+
+\crefformat{equation}{(#2#1#3)}
+\newenvironment{eqn}[1]{
+    \align
+    \notag
+    \ifthenelse{\equal{#1}{}}{}{\label{eqn:#1}}
+}{
+    \endalign
+}
+
+\crefformat{enumi}{(#2#1#3)}
+
+% %\addto{\captionsafrikaans}{\renewcommand{\bibname}{Lys van Verwysings}}
+% %\addto{\captionsenglish}{\renewcommand{\bibname}{List of References}}

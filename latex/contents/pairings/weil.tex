@@ -1,0 +1,58 @@
+\begin{dfn}{}{weil}
+For $m \in \Z$ such that $\rchar(K) \nmid m$, the \emph{$m$-th Weil pairing} on $E[m]$ is the mapping
+\begin{eqn}{}
+e_m : E[m] \times E[m] \to \un{\bar{K}}[m]
+\end{eqn}
+defined by $e_m(P, P) \defeq e_m(P, \ptinfty) \defeq e_m(\ptinfty, P) \defeq 1$ for all $P \in E[m]$ and
+\begin{eqn}{}
+e_m(P, Q) \defeq (-1)^m \frac{f_{P;m}(Q)}{f_{Q;m}(P)}
+\end{eqn}
+for all $P, Q \in E[m] \setminus \set{\ptinfty}$ such that $P \neq Q$ \citep{Weil}.
+\end{dfn}
+
+Note that in the above definition $\un{\bar{K}}$ is considered as a group variety, so that $\un{\bar{K}}[m]$ denotes the group of $m$-th roots of unity in $\bar{K}$. It remains to be established that $e_m(P, Q) \in \un{\bar{K}}[m]$ as claimed. This is a trivial consequence of the following theorem, which justifies the chain of equalities $e_m(P, Q)^m = e_m([m] P, Q) = e_m(\ptinfty, Q) = 1$.
+
+\begin{thm}{}{weil_prop}
+Let $P, P', Q \in E[m]$, $\phi : E \to E'$ an isogeny, and $Q' \in E'[m]$. Then, the Weil pairings $e_m$ and $e'_m$ on $E[m]$ and $E'[m]$ respectively satisfy the following properties:
+\begin{enumerate}[(a)]
+\item (Alternating) $e_m(P, Q) = e_m(Q, P)^{-1}$;
+\item (Bilinear) $e_m(P + P', Q) = e_m(P, Q) e_m(P', Q)$ and $e_m(Q, P + P') = e_m(Q, P) e_m(Q, P')$;
+\item (Non-degenerate) if $e_m(P, R) = 1$ for all $R \in E[m]$ or $e_m(R, P) = 1$ for all $R \in E[m]$ then $P = \ptinfty$; and
+\item (Compatable) $e_m(P, \hat{\phi} Q') = e'_m(\phi P, Q')$.
+\end{enumerate}
+\end{thm}
+\begin{proof}
+The alternating property is immediate from the definition, and implies that bilinearity and non-degeneracy only need to be shown in the first argument. For a proof of the other properties, it is useful to consider an alternative construction of the Weil pairing, as given in Section~11.2 of \citep{Washington}. See Theorem~11.7 of the same text for a proof of the remaining properties using this construction, and Theorem~11.12 for a proof that these definitions of the Weil pairing are equivalent.
+\end{proof}
+
+%\begin{dfn}{}{}
+%The \emph{embedding field} of $E[m]$ is the field $K_{E[m]} \defeq K(E[m])$ obtained by adjoining the coordinates of the $m$-torsion points of $E$ to $K$, and the degree $d_{E[m]} \defeq [K(E[m]) : K]$ is called the \emph{embedding degree} of $E[m]$.
+%\end{dfn}
+
+%\begin{rmk}{}{weil_embed}
+%From the construction of $f_{P;m}$ in \cref{dfn:miller_func}, it is easy to see that the point $P$ and the function $f_{P;m}$ are defined over the same extension of $K$. Thus, the $m$-th Weil pairing on $E$ is in fact a pairing
+%\begin{eqn}{}
+%e_m : E(K_{E[m]})[m] \times E(K_{E[m]})[m] \to \un{K_{E[m]}}[m].
+%\end{eqn}
+%\end{rmk}
+
+Since the point $P$ and the function $f_{P;m}$ are defined over the same extension $L / K$ by the construction in \cref{dfn:miller_func}, and thus $f_{P;m}(Q) \in L$ if $Q \in E(L)$, it is easy to see that if $E[m] \leq E(L)$, then the $m$-th Weil pairing on $E$ has the form \[e_m : E(L)[m] \times E(L)[m] \to \un{L}[m].\]
+
+As we pointed out in \cref{rmk:miller_fail}, Miller's algorithm may fail to compute $f_{P;m}(Q)$, but in this case $[k]P = Q$ for some $k = 1, \ldots, m-1$, so that $e_m(P, Q) = e_m(P, [k]P) = e_m(P, P)^k = 1$. With this observation, a Sage implementation of an algorithm for computing the $m$-th Weil pairing on $E$ is given in \cref{alg:weil}. This algorithm has a time complexity of $\Theta(\log m)$ operations in some extension $L$ over $K$ such that $E[m] \leq E(L)$, since it merely involves two executions of Miller's algorithm.
+
+\begin{alg}{Weil pairing}{weil}
+\begin{sagecode}
+def weil_pairing(E, m, P, Q):
+    """
+    E: an elliptic curve
+    m: a positive integer
+    (P, Q): m-torsion points on E
+    """
+    if P == Q or P == 0 or Q == 0:
+        return 1
+    try:
+        return (-1)^m * miller(E, m, P, Q) / miller(E, m, Q, P)
+    except ZeroDivisionError:
+        return 1
+\end{sagecode}
+\end{alg}

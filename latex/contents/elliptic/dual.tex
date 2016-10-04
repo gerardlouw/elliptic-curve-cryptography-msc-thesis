@@ -1,0 +1,64 @@
+The following theorem establishes the existence of a special isogeny related to any isogeny of elliptic curves, and holds more generally for abelian varieties.
+
+\begin{thm}{}{}
+Let $\phi : E \to E'$ be an isogeny, then there is a unique isogeny $\hat{\phi} : E' \to E$, called the \emph{dual isogeny} of $\phi$, such that $\hat{\phi} \phi = [\deg \phi]$.
+\end{thm}
+
+If $\phi : E \to E'$ is an isogeny, then we say that $E$ and $E'$ are \emph{isogenous}. The existence of the dual isogeny shows that the property of being isogenous is an equivalence relation on elliptic curves, which may be viewed as a generalisation of isomorphism, since isomorphisms are isogenies of degree one.
+
+\begin{thm}{}{}
+Let $\phi, \chi \in \Mor(E, E')$ and $\psi : E' \to E''$ be isogenies, and let $m \in \Z$. Dual isogenies satisfy the following properties:
+\begin{enumerate}[(a)]
+\item $\widehat{[m]} = [m]$;
+\item $\widehat{\psi \phi} = \hat{\phi} \hat{\psi}$;
+\item $\widehat{\phi + \chi} = \hat{\phi} + \hat{\chi}$;
+\item \label{eqdeg} $\deg \hat{\phi} = \deg \phi$;
+\item \label{invo} $\hat{\hat{\phi}} = \phi$; and
+\item $\phi \hat{\phi} = [\deg \phi]$.
+\end{enumerate}
+\end{thm}
+\begin{proof}
+%Refer to Theorem~III.6.2 of \citep{Silverman} for a proof of these properties.
+We present the proof given to Theorem~III.6.2 of \citep{Silverman}.
+\begin{enumerate}[(a)]
+\item Clearly $[m][m] = [m^2] = [\deg m]$, so that the statement follows by uniqueness of the dual isogeny.
+\item $\hat{\phi} \hat{\psi} \psi \phi = \hat{\phi} [\deg \psi] \phi = [\deg \psi] \hat{\phi} \phi = [\deg \psi] [\deg \phi] = [\deg(\psi \phi)]$, from which the statement follows by uniqueness.
+\item Refer to Theorem~III.6.2(b) of \citep{Silverman} for a proof. %TODO show using Weil pairing
+\item $\deg\hat{\phi} \deg\phi = \deg (\hat{\phi} \phi) = \deg([\deg \phi]) = (\deg \phi)^2$, so that $\deg\hat{\phi} = \deg\phi$.
+\item $\phi \hat{\phi} \phi = \phi [\deg \phi] = [\deg \phi] \phi$, so that $\phi \hat{\phi} = [\deg \phi] = [\deg \hat{\phi}]$, where right cancellation is possible because $\phi$ is an epimorphism. By uniqueness of the dual isogeny, it follows that $\hat{\hat{\phi}} = \phi$.
+\item Using \cref{invo} and \cref{eqdeg}, $\phi \hat{\phi} = \hat{\hat{\phi}} \hat{\phi} = [\deg \hat{\phi}] = [\deg \phi]$.
+\end{enumerate}
+\end{proof}
+
+\begin{dfn}{}{trace}
+The \emph{trace} of an isogeny $\phi \in \End(E)$ is the integer
+\[
+\tr\phi \defeq 1 + \deg \phi - \deg([1] - \phi).
+\]
+\end{dfn}
+
+It is easy to show that $\tr \hat{\phi} = \tr \phi$ using the properties of the dual isogeny.
+
+\begin{lem}{}{tr_isog}
+Let $\phi \in \End(E)$ be a non-zero endomorphism. Then
+\[
+\hat{\phi} + \phi = [\tr \phi].
+\]
+\end{lem}
+\begin{proof}
+\begin{align*}
+[\deg([1] - \phi)] &= \widehat{([1] - \phi)}([1] - \phi) \\
+&= ([1] - \hat{\phi}) ([1] - \phi) \\
+&= [1] - (\hat{\phi} + \phi) + [\deg \phi].
+\end{align*}
+\end{proof}
+
+\begin{thm}{}{char_eqn}
+Let $\phi \in \End(E)$ be a non-zero endomorphism. Then $\phi$ satisfies the \emph{characteristic equation}
+\[
+\phi^2 - [\tr \phi] \phi + [\deg \phi] = [0].
+\]
+\end{thm}
+\begin{proof}
+$[\tr \phi] \phi = \hat{\phi} \phi + \phi^2 = [\deg \phi] + \phi^2$.
+\end{proof}

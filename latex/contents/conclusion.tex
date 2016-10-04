@@ -1,0 +1,9 @@
+In this thesis, we surveyed the mathematics underlying elliptic curve cryptography. In particular, we discussed the algorithmic aspects of computations involving elliptic curves over finite fields, thereby demonstrating that they are feasible objects to work with in a cryptographic setting, where the finite fields used are typically of a very large order.
+
+By describing Schoof's algorithm, we showed that it is also possible to compute the number of points on an elliptic curve over a finite field in an efficient manner, allowing us to learn enough about the elliptic curve's group structure to enable its use in cryptographic algorithms.
+
+After formulating the discrete logarithm and Diffie-Hellman problems on elliptic curves, we gave an overview of solutions to these problems. We saw that the known algorithms for solving the discrete logarithm problem on a general group variety are all infeasible when the number of points on the variety is a small multiple of a very large prime number, in which case the Pohlig-Hellman reduction cannot be used effectively, and computations using the baby-step giant-step algorithm or Pollard's algorithms are too cumbersome.
+
+Furthermore, we discussed some reductions of the discrete logarithm problem to the additive or multiplicate group of a finite field which may only be applied to special types of elliptic curves. However, we saw that such elliptic curves are extremely rare, so that the reductions are not an obstacle to finding curves suitable for cryptographic use.
+
+Finally, we presented a selection of cryptosystems based on the difficulty of solving the discrete logarithm and Diffie-Hellman problems on group varieties, for which elliptic curves are a suitable candidate.

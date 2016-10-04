@@ -1,0 +1,36 @@
+%In \cref{chp:babystep}, we describe an algorithm with time complexity $O(\sqrt{q})$ (that is, exponential in $\log q$) for solving the Diffie-Hellman problem on large $\ell$-order subgroups of elliptic curve groups $E(\Fq)$. The fastest known algorithms for solving the so-called \emph{elliptic curve Diffie-Hellman problem} all have time complextiy $O(\sqrt{p})$, thus making elliptic curve groups good candidates for use in cryptography.
+
+In the present section we describe a simple algorithm known as the \emph{baby-step giant-step algorithm}, due to \citep{Shanks}, for solving the discrete logarithm problem for a general group variety with a more favourable time complexity than that of a brute force solution. %TODO cite Shank
+
+Let $m \in [0, n)$ be an integer. Using the Euclidean division of $k$ by $m$ we may uniquely rewrite a point $P \defeq [k] G$ as $P = [mq + r] G$, where $0 \leq q \leq \lfloor n / m \rfloor$ and $0 \leq r < m$. We now precompute the restriction of $\log_G$ to the values $[0] G, [1] G, \ldots, [m - 1] G$ and store it efficiently in a lookup table, i.e. we store the key-value pairs $([j] G, j)$ for $j = 0, \ldots, m - 1$. Iterating over the values $i = 0, \ldots, \lfloor n / m \rfloor$, we compute $P - [mi] G = [m(q-i) + r] G$, and test for its membership in the lookup table. Clearly, if a pair $([j] G, j)$ is found, then $q = i$, and $r = j$, thus fully determining the discrete logarithm.
+
+The time complexity of the algorithm crucially depends on the parameter $m$, since the precomputation step requires about $m$ point additions, and the iteration step requires about $n / m$ point additions on average, for a total of $m + n / m$ point additions. Thus, the number of point additions is minimised when $m \approx \sqrt{n}$, thus yielding an algorithm with a time complexity of $\Theta(\sqrt{m})$ point additions. Sage code implementing the baby-step giant-step algorithm is given in \cref{alg:bsgs}.
+
+\begin{alg}{Baby-step giant-step}{bsgs}
+\begin{sagecode}
+def baby_step_giant_step(G, P, n):
+    """
+    G: a point
+    P: a multiple of G
+    n: the order of G
+    """
+    m = round(sqrt(n))
+    log_G = {}
+    jG = 0 * G
+    for j in (0..m-1):
+        log_G[jG] = j
+        jG += G
+    mG = m * G
+    miG = 0 * G
+    for i in (0..floor(n/m)):
+        if P - miG in log_G:
+            return m * i + log_G[P - miG]
+        miG += mG
+\end{sagecode}
+\end{alg}
+
+Note that the space complexity of the algorithm also depends on $m$ -- indeed, exactly $m$ points are stored in the lookup table, or $\Theta(\sqrt{n})$ when optimising for the time complexity.
+
+It is worth noting that the precomputation step only needs to be performed once for a given base point $G$, while the iteration step needs to be executed for each evaluation of $\log_G$ at a point in $\langle G \rangle$. For this reason, one may wish to set $m$ to a larger value than $\sqrt{n}$ if one wishes to solve many discrete logarithms for the same base point $G$.
+
+Using modern computer hardware, the space complexity of the baby-step giant-step algorithm may prove to be more of a hurdle than its time complexity when solving large instances of the discrete logarithm problem. In \cref{sec:pollard}, we present two probabilistic algorithms with the same time complexity as the baby-step giant-step algorithm, but with significantly better space complexities.

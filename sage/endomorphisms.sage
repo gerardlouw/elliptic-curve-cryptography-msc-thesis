@@ -1,0 +1,106 @@
+class EndomorphismMod:
+    def __init__(self, E, fx, fy, psi):
+        R.<x> = E.base_field()['x'].quotient(psi)
+        self.E = E
+        self.fx = R(fx)
+        self.fy = R(fy)
+        self.psi = psi
+        self.f = x^3 + E.a4() * x + E.a6()
+        self.A = E.a4()
+
+    def __add__(self, other):
+        if isinstance(other, Integer):
+            other *= IdentityEndomorphismMod(self.E, self.psi)
+        if isinstance(other, ZeroEndomorphismMod):
+            return self
+        if self.fx == other.fx:
+            if self.fy == other.fy:
+                m = (3 * self.fx^2 + self.A) / (2 * self.fy * self.f)
+            else:
+                return ZeroEndomorphismMod(self.E, self.psi)
+        else:
+            div, inv, _ = xgcd((self.fx - other.fx).lift(), self.psi)
+            if div.is_constant():
+                m = (self.fy - other.fy) * inv
+            else:
+                raise ZeroDivisionError(div)
+        fx = m^2 * self.f - self.fx - other.fx
+        fy = m * (self.fx - fx) - self.fy
+        return EndomorphismMod(self.E, fx, fy, self.psi)
+
+    def __radd__(self, other):
+        return self + other
+
+    def __neg__(self):
+        return EndomorphismMod(self.E, self.fx, -self.fy, self.psi)
+
+    def __sub__(self, other):
+        return self + -other
+
+    def __rsub__(self, other):
+        return -(self + -other)
+
+    def __mul__(self, other):
+        if isinstance(other, Integer):
+            if other < 0:
+                return -self * -other
+            alpha = ZeroEndomorphismMod(self.E, self.psi)
+            while other > 0:
+                if other % 2 == 1:
+                    alpha += self
+                self += self
+                other //= 2
+            return alpha
+        fx = self.fx.lift()(other.fx)
+        fy = self.fy.lift()(other.fx) * other.fy
+        return EndomorphismMod(self.E, fx, fy, self.psi)
+
+    def __rmul__(self, other):
+        return self * other
+
+    def __pow__(self, n):
+        alpha = IdentityEndomorphismMod(self.E, self.psi)
+        while n > 0:
+            if n % 2 == 1:
+                alpha *= self
+            self *= self
+            n //= 2
+        return alpha
+
+    def __eq__(self, other):
+        if isinstance(other, Integer):
+            other *= IdentityEndomorphismMod(self.E, self.psi)
+        if isinstance(other, ZeroEndomorphismMod):
+            return False
+        return self.fx == other.fx and self.fy == other.fy
+
+class ZeroEndomorphismMod(EndomorphismMod):
+    def __init__(self, E, psi):
+        self.E = E
+        self.psi = psi
+
+    def __neg__(self):
+        return self
+
+    def __add__(self, other):
+        return other
+
+    def __mul__(self, other):
+        return self
+
+    def __eq__(self, other):
+        if isinstance(other, Integer):
+            other *= EndomorphismMod(self.E, x, 1, self.psi)
+        return isinstance(other, ZeroEndomorphismMod)
+
+class IdentityEndomorphismMod(EndomorphismMod):
+    def __init__(self, E, psi):
+        _.<x> = E.base_field()['x'].quotient(psi)
+        EndomorphismMod.__init__(self, E, x, 1, psi)
+
+class FrobeniusEndomorphismMod(EndomorphismMod):
+    def __init__(self, E, psi):
+        q = E.base_field().order()
+        _.<x> = E.base_field()['x'].quotient(psi)
+        f = x^3 + E.a4()*x + E.a6()
+        EndomorphismMod.__init__(self, E, x^q, f^((q - 1) // 2), psi)

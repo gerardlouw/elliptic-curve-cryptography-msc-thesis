@@ -1,0 +1,75 @@
+\sbs{Regular functions}{}
+
+Any \emph{regular function} $\alpha$ in the \emph{coordinate ring} $L[E] \defeq L[x, y] / (y^2 - f)$ over $L$ of an elliptic curve $E$ may be put into a simple canonical form. Given a polynomial representative in $L[x, y]$ of $\alpha$, we may substitute the factor $y^{2k}$, where $k \in \N$ is maximal, with $f^k$ in every term which contains such a factor, yielding a polynomial of the form $\alpha_1 + \alpha_2 y$, where $\alpha_1, \alpha_2 \in L[x]$. Such a polynomial must be the unique representative for $\alpha$ of this form, since any further substitutions using the Weierstrass equation will introduce a factor $y^2$ in some term.
+
+For any $\alpha \in L[E]$, its \emph{conjugate} $\bar{\alpha}(x, y) \defeq \alpha(x, -y)$ is also a regular function, and the canonical form of its \emph{norm} $N(\alpha) \defeq \alpha \bar{\alpha}$ is a polynomial in $x$ only, since
+\begin{eqn}{}
+(\alpha_1 + \alpha_2 y) (\alpha_1 - \alpha_2 y) &= \alpha_1^2 - \alpha_2^2 y^2 = \alpha_1^2 - \alpha_2^2 f.
+\end{eqn}
+
+\sbs{Rational functions}{}
+
+A \emph{rational function} $\alpha$ in the \emph{function field} $L(E) \defeq \Frac(L[E])$ of $E$ may also be put into a canonical form. If $\alpha = \beta / \gamma$, where $\beta, \gamma \in L[E]$ are in canonical form, then $\alpha = \beta\bar{\gamma} / N(\gamma)$, which can be written in the general form $\alpha_1 + \alpha_2 y$, where $\alpha_1, \alpha_2 \in L(x)$.
+
+The conjugate $\bar{\alpha}$ and norm $N(\alpha)$ of a rational function are defined similarly to the regular function case, and by the same line of reasoning we may see that the canonical representation of $N(\alpha)$ is an element of $L(x)$.
+
+\sbs{Morphisms}{}
+
+Let $E' : y^2 = x^3 + a_4'x + a_6'$ be another elliptic curve over $K$. A non-zero \emph{morphism} of group varieties $\phi \defeq (\alpha, \beta) \in \Mor(E, E')$, where $\alpha, \beta \in \bar{K}(E)$, may also be put into a canonical form as follows. Note that by the definition of negation $-\phi = (\alpha, -\beta)$, but since $\phi$ is a morphism of groups, we also have $-\phi = (\bar{\alpha}, \bar{\beta})$. It follows that $\alpha = \bar{\alpha}$, so that $\alpha \in \bar{K}(x)$ and $-\gamma = \bar{\gamma}$, so that $\gamma \in \bar{K}(x)y$. The canonical form of $\phi$ is then $(\phi_x, \phi_y y)$, where $\phi_x, \phi_y \in \bar{K}(x)$.
+
+\begin{lem}{}{mor_eq}
+Let $\phi \defeq (\phi_x, \phi_y y) \in \Mor(E, E')$ be a morphism in canonical form. Then the equation $\phi_y^2 f = \phi_x^3 + a_4' \phi_x + a_6'$ in $\bar{K}(x)$ is satisfied.
+\end{lem}
+\begin{proof}
+Substituting $(\phi_x, \phi_y y)$ into the Weierstrass equation for $E'$ and replacing $y^2$ with $f$ yields the result.
+\end{proof}
+
+\sbs{Isogenies}{}
+
+\begin{dfn}{}{}
+An \emph{isogeny} is an epimorphism of group varieties with a finite kernel. The \emph{degree} of an isogeny $\phi : E \to E'$ is defined as $\deg \phi \defeq [\bar{K}(E) : \phi^* \bar{K}(E')]$, where $\phi^*\alpha \defeq \alpha \phi$ for $\alpha \in \bar{K}(E')$, and $\phi$ is said to be \emph{separable} if and only if the extension $\bar{K}(E) / \phi^* \bar{K}(E')$ is separable.
+\end{dfn}
+
+From the well known fact every morphism of projective curves is either an epimorphism or constant, it follows that the zero morphism $(0 : 1 : 0)$ is the only morphism of elliptic curves as group varieties which is not an isogeny. For convenience, one may sometimes wish to consider the zero morphism as an isogeny of degree zero.
+
+\begin{thm}{}{sep_ker_deg}
+If $\phi : E \to E'$ is an isogeny, then $\#\ker \phi \mid \deg \phi$, with $\#\ker \phi = \deg \phi$ if and only if $\phi$ is separable.
+\end{thm}
+\begin{proof}
+See Theorem III.4.10 of \citep{Silverman}.
+\end{proof}
+
+The following theorem gives some useful properties for isogenies which have been put into canonical form.
+
+\begin{thm}{}{iso_crit}
+Let $\phi \defeq (\phi_x, \phi_y y) \in \Mor(E, E')$ be an isogeny in canonical form, where $\phi_x \defeq \phi_{x;1} / \phi_{x;2}$ for some relatively prime $\phi_{x; 1}, \phi_{x; 2} \in \bar{K}[x]$. Then
+\begin{enumerate}[(a)]
+\item $(x, y) \in \ker \phi$ if and only if $\phi_{x; 2}(x) = 0$;
+\item $\deg \phi = \max(\deg \phi_{x; 1}, \deg \phi_{x; 2})$; and
+\item $\phi$ is inseparable if and only if $p \defeq \rchar(K)$ is prime and $\phi_x \in \bar{K}(x^p)$.
+\end{enumerate}
+\end{thm}
+\begin{proof}
+\begin{enumerate}[(a)]
+\item See Corollary~5.23 of \citep{Sutherland}.
+\item See Lemma~9.6.13 of \citep{Galbraith}.
+\item See Corollary~II.2.12 of \citep{Silverman}, which along with \cref{lem:mor_eq} implies the result.
+\end{enumerate}
+\end{proof}
+
+\begin{thm}{}{insep_sum}
+Let $\phi, \chi \in \Mor(E, E')$ be isogenies with $\phi$ inseparable. Then $\phi + \chi$ is separable if and only if $\chi$ is separable.
+\end{thm}
+\begin{proof}
+If $\chi$ is inseparable, then $\phi_x, \chi_x \in \bar{K}(x^p)$ by \cref{thm:iso_crit}, and so $\phi_y^2 f, \chi_y^2 f \in \bar{K}(x^p)$ by \cref{lem:mor_eq}. Then $(\phi + \chi)_x = m_{\phi, \chi}^2 - \phi_x - \chi_x$, where
+\begin{eqn}{}
+m_{\phi,\chi} =
+\begin{cases}
+(3 \phi_x^2 + a_4) / 2 \phi_y y & \textnormal{if $\phi = \chi$} \\
+(\chi_y - \phi_y) y / (\chi_x - \phi_x) & \textnormal{if $\phi \neq \chi$},
+\end{cases}
+\end{eqn}
+so that $m_{\phi,\chi}^2 \in \bar{K}(x^p)$ in either case, and thus $\phi + \chi$ is inseparable by \cref{thm:iso_crit}.
+
+If $\phi + \chi$ is inseparable, then $\chi = (\phi + \chi) - \phi$ is inseperable by the result we have just demonstrated, since $-\phi$ is trivially also inseparable.
+\end{proof}

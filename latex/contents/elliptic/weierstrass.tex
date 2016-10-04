@@ -1,0 +1,79 @@
+%\begin{dfn}{}{weierstrass}
+%A \emph{generalized Weierstrass equation} over $K$ is an equation of the form
+%\begin{eqn}{}
+%y^2 + a_1 xy + a_3 y = x^3 + a_2 x^2 + a_4 x + a_6,
+%\end{eqn}
+%where $a_1, a_2, a_3, a_4, a_6 \in K$. An \emph{elliptic curve (in generalized Weierstrass form)} over $K$ is the projective closure of a smooth affine plane curve cut out by a generalized Weierstrass equation. Sometimes we will abbreviate $h \defeq a_1 x + a_3$ and $f \defeq x^3 + a_2 x^2 + a_4 x + a_6$.
+%\end{dfn}
+
+\sbs{Weierstrass equations and elliptic curves}{}
+
+\begin{dfn}{}{weierstrass}
+A \emph{Weierstrass equation} over $K$ is an equation of the form
+\begin{eqn}{}
+y^2 = x^3 + a_4 x + a_6,
+\end{eqn}
+where $a_4, a_6 \in K$. Sometimes we will abbreviate $f(x) \defeq x^3 + a_4 x + a_6$. An \emph{elliptic curve (in Weierstrass form)} over $K$ is the projective closure of a smooth affine plane curve cut out by a Weierstrass equation.
+\end{dfn}
+
+It is clear that the projective point $\ptinfty \defeq (0 : 1 : 0)$ is the only point at infinity on an elliptic curve, and it is therefore referred to as \emph{the point at infinity}. This fact allows us to deal with elliptic curves as affine curves, treating the point at infinity separately. Checking on the affine patch where $x = 0$ easily shows that the point at infinity is always smooth, so that elliptic curves are smooth projective curves.
+
+\sbs{Discriminant}{}
+
+\begin{dfn}{}{}
+The \emph{discriminant} of a Weierstrass equation is the quantity
+\begin{eqn}{}
+\Delta \defeq -16(4 a_4^3 + 27a_6^2)
+%\begin{cases}
+%a_6 & \textnormal{if $\rchar(K) = 2$} \\
+%-16(4 a_4^3 + 27a_6^2) & \textnormal{if $\rchar(K) \neq 2, 3$}.
+%\end{cases}
+\end{eqn}
+\end{dfn}
+
+%It is also possible to define the discriminant of a generalized Weierstrass equation, although the resulting formula is unwieldy.
+
+The following theorem gives us a simple criterion for determining whether an arbitrary Weierstrass equation defines an elliptic curve.
+
+\begin{thm}{}{}
+The affine plane curve cut out by a Weierstrass equation is smooth if and only if $\Delta \neq 0$.
+\end{thm}
+
+This immediately suggests a probabilistic algorithm of Las Vegas type for randomly sampling from the elliptic curves over a finite field $\Fq$: select each of the coefficients in a Weierstrass equation uniformly at random from $\Fq$, until a combination of coefficients is found which results in a non-zero discriminant. Sage code implementing this approach is given in \cref{alg:elliptic_sampling}.
+
+\begin{alg}{Random elliptic curve}{elliptic_sampling}
+\begin{sagecode}
+def random_elliptic_curve(K):
+    """
+    K: a field
+    """
+    while true:
+        a_4, a_6 = random_vector(K, 2)
+        if -16 * (4 * a_4^3 + 27 * a_6^2) != 0:
+            return EllipticCurve([a_4, a_6])
+\end{sagecode}
+\end{alg}
+
+%The following theorem tells us how to simplify the equation of an elliptic curve in generalized Weierstrass form, depending on $\rchar(K)$.
+
+%\begin{thm}{}{short_weierstrass}
+%Let $E$ be an elliptic curve over $K$ in generalized Weierstrass form. There is a $K$-isomorphism between $E$ and the elliptic curve
+%\begin{eqn}{short_weierstrass}
+%E' :
+%\begin{cases}
+%y^2 + x y = x^3 + a'_2 x^2 + a'_6 & \textnormal{if $\rchar(K) = 2$} \\
+%y^2 = x^3 + a'_4 x + a'_6 & \textnormal{if $\rchar(K) \neq 2, 3$}
+%\end{cases}
+%\end{eqn}
+%given by
+%\begin{eqn}{}
+%(x, y) \mapsto
+%\begin{cases}
+%(a_1^2 x + a_3 / a_1, a_1^3 y + (a_1^2 a_4 + a_3^2) / a_1^3) & \textnormal{if $\rchar(K) = 2$} \\
+%(x + a_2 / 3 + a_1^2 / 12, y + (a_1 x + a_3) / 2) & \textnormal{if $\rchar(K) \neq 2, 3$},
+%\end{cases}
+%\end{eqn}
+%where $a'_2, a'_4, a'_6 \in K$. The elliptic curve $E'$ is said to be in \emph{short Weierstrass form}, and such an equation with arbitrary constants is called %a \emph{short Weierstrass equation}, regardless of whether it cuts out a smooth curve.
+%\end{thm}
+
+%Note that the $\rchar(K) = 3$ case is not considered in \cref{thm:short_weierstrass}. This is intentional, and we will always ignore this case, since elliptic curves over such fields are not usually encountered in cryptography. As can be seen from the theorem, the short Weierstrass form is simplest in the $\rchar(K) \neq 2, 3$ case, and so we will sometimes also ignore the $\rchar(K) = 2$ case when doing so results in a much simpler exposition. Furthermore, note that in the $\rchar(K) = 2$ case, we have assumed that $a_1 \neq 0$. Although there are elliptic curves in characteristic two with $a_1 = 0$, it is reasonable for us to ignore their arithmetic. Such elliptic curves are said to be \emph{supersingular}, and we will later discuss an attack which renders cryptosystems using them insecure.

@@ -1,0 +1,16 @@
+% !TEX root = ../ecc.tex
+
+%TODO sucks, rewrite
+%Elliptic curves are algebraic geometric objects which have been studied for more than a century, and have recently been applied with great success to problems in mathematics, including Andrew Wiles's acclaimed proof of Fermat's Last Theorem. As for practical uses, elliptic curves have recently been applied to cryptography. In 1985, Neal Koblitz and Victor S. Miller independently suggested the use of cryptographic algorithms based on the properties of elliptic curves \cite{article:Miller,article:Koblitz}. Since the 2000s they have gained wider acceptance in the cryptographic community, and are now seen as a viable alternative to cryptosystems based on the difficulty of integer factorization, such as RSA.
+
+%This thesis will serve as a survey of the mathematical theory of elliptic curves, with applications to cryptography. The thesis will cover all relevant theory in a self-contained manner. As part of this thesis, certain implementation details and cryptanalytic attacks which are of interest to our industry partner, Irdeto, will be investigated. Irdeto have indicated particular interest in the elliptic curve digital signature algorithm, and in differential fault analysis attacks, so these will be studied in more depth.
+
+%For the discussion on algebraic geometry, a knowledge of basic results from commutative algebra is assumed. Familiarity with the language of category theory is assumed throughout. It is also assumed that the reader is familiar with the time and space complexities of standard algorithms in finite field arithmetic.
+
+Elliptic curves are among the simplest examples of group varieties -- algebro-geometric objects which may be adorned with a group structure. Their theory has been fruitfully applied to important problems in number theory, and they have fairly recently found a practical application in the field of cryptography.
+
+The first cryptosystem based on the so-called Diffie-Hellman problem on group varieties was introduced in \citep{DiffieHellman}. Many other authors were subsequently inspired to propose cryptosystems based on the same problem, thereby solving a variety of problems in public-key cryptography. These cryptosystems were classically formulated using the multiplicative group $\un{\Fq}$, which may be viewed as the affine plane curve $xy = 1$ over $\Fq$. Replacing this group variety with an elliptic curve yields cryptosystems which are more secure than their classic counterparts, thus making this choice very popular in recent years.
+
+In this thesis we present the background on elliptic curves needed to discuss elliptic curve cryptography, and we formulate the Diffie-Hellman problem on elliptic curves, as well as the related discrete logarithm problem. We then give an exposition of known solutions to the discrete logarithm problem, of which some work for general group varieties, while others are specific to special classes of elliptic curves. Finally, we describe a selection of public-key cryptosystems based on the Diffie-Hellman and discrete logarithm problems on elliptic curves.
+
+For the discussion on elliptic curves, we assume a familiarity of basic algebraic geometry. In the analysis of various algorithms throughout the thesis, a knowledge of the time and space complexities of finite field arithmetic is also assumed.

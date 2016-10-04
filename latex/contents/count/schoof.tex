@@ -1,0 +1,162 @@
+% !TEX root = ../../ecc.tex
+
+The first algorithm for computing $\#E(\Fq)$ with time complexity polynomial in $\log q$ was published in \citep{Schoof}. Its discovery was the theoretical breakthrough which allowed \citep{Miller} and \citep{Koblitz} to suggest the use of elliptic curves in cryptography soon thereafter. In this section, we describe this algorithm, known as \emph{Schoof's algorithm}, closely following the exposition of \citep{Sutherland}.
+
+The algorithm works by computing the trace of Frobenius $\tr \phi_q$ modulo $\ell$ for many distinct small primes $\ell$, then using the Chinese remainder theorem to compute $\tr \phi_q$ modulo the product of these primes. Since by Hasse's theorem $\tr \phi_q$ can only take values in an interval of width $4 \sqrt{q}$, we may fully specify its value by taking the product of primes to be larger than this interval.
+
+The technique we will present for computing $\tr \phi_q \bmod \ell$ works for any prime $\ell \neq p$. Therefore we may simply use the $k$ smallest primes $\ell_1, \ldots, \ell_k$ such that the product
+\begin{eqn}{}
+N_k \defeq \prod_{i=1}^k \ell_i
+\end{eqn}
+satisfies $N_k > 4 \sqrt{q}$. It is possible that $\ell_i = p$ for some $i \leq k$, but we ignore this possibility since it does not occur in large characteristic and we could simply substitute $\ell_i$ with $\ell_{k+1}$. Sage code for the main loop of Schoof's algorithm is given in \cref{alg:schoof}
+
+\begin{alg}{Schoof}{schoof}
+\begin{sagecode}
+def schoof(E):
+    """
+    E: an elliptic curve
+    """
+    q = E.base_field().order()
+    residues = [trace_of_frobenius_mod_2(E)]
+    moduli = [2]
+    l = 3
+    while prod(moduli) <= 4 * sqrt(q):
+        if q % l == 0:
+            l = next_prime(l)
+        residues.append(trace_of_frobenius_mod(E, l))
+        moduli.append(l)
+        l = next_prime(l)
+    t = crt(residues, moduli)
+    if t > 2 * sqrt(q):
+        return t - prod(moduli)
+    else:
+        return t
+\end{sagecode}
+\end{alg}
+
+\sbs{Computing the trace of Frobenius modulo 2}{}
+
+In order to compute $\tr \phi_q \bmod{\ell}$ for some prime $\ell$, we proceed as follows. The case $\ell = 2$ is dealt with separately by checking whether $(f(x), x^q - x)$ is a constant. We know that the roots of $f(x)$ are the $x$-coordinates of the points of order 2 of $E$, while the roots of $x^q - x$ contain the $x$-coordinates of all of its $\Fq$-rational points. Therefore, $(f(x), x^q - x)$ is a constant if and only if $E(\Fq)$ has no points of order 2 so that $\#E(\Fq) = q + 1 - \tr \phi_q$ is odd, or equivalently $\tr \phi_q$ is odd since $p$ is assumed to be an odd prime, so that $\tr \phi_q \bmod 2$ is determined. Note that reducting $x^q - x$ modulo $f(x)$ will not affect which divisors it has in common with $f(x)$. Therefore, we should rather compute $(f(x), x^q - x \bmod f(x))$, using the square-and-multiply algorithm to first calculate the modular exponent $x^q \bmod f(x)$ \citep{Washington}. Sage code for computing the trace of Frobenius modulo 2 is given in \cref{alg:frob_mod_2}
+
+\begin{alg}{Trace of Frobenius modulo 2}{frob_mod_2}
+\begin{sagecode}
+def trace_of_frobenius_mod_2(E):
+    """
+    E: an elliptic curve
+    """
+    F = E.base_field()
+    _.<x> = F[]
+    f = x^3 + E.a4() * x + E.a6()
+    q = F.order()
+    if gcd(f, power_mod(x, q, f) - x).is_constant():
+        return 1
+    else:
+        return 0
+\end{sagecode}
+\end{alg}
+
+\sbs{Characteristic equation of Frobenius modulo $\ell$}{}
+
+Suppose now that $\ell$ is an odd prime. Let $t_\ell$ denote the unique integer of minimum absolute value satisfying $\tr \phi_q \equiv t_\ell \mod{\ell}$ so that the multiplication endomorphisms $[\tr \phi_q]$ and $[t_\ell]$ are equal when restricted to $E[\ell]$. Furthermore, note that since $\phi_q$ is a monomorphism, its restriction $\phi_{q;\ell}$ to $E[\ell]$ is a monomorphism. By \cref{thm:char_eqn,thm:frob_prop} we have that the characteristic equation of the Frobenius endomorphism is
+\[
+\phi_q^2 + [q] = [\tr \phi_q] \phi_q,
+\]
+from which we derive the equation
+\begin{equation}
+\phi_{q;\ell}^2 + [q \bmod{\ell}] = [t_\ell] \phi_{q;\ell} \label{char_ell}
+\end{equation}
+which is satisfied for all $\ell$-torsion points of $E$.
+
+Choosing an affine point $(x, y) \in E[\ell]$, we may now test each of the values $t_\ell = 0, \pm 1, \ldots, \pm\frac{\ell - 1}{2}$, terminating when we find a value of $t_\ell$ for which the equation is satisfied at $(x, y)$. Such a value will necessarily be unique, since $\phi_{q;\ell}(x, y)$ has order $\ell$. However, there may be no appropriate point $(x, y)$ lying in $E(\Fq)$, thus requiring that we work over a potentially large algebraic extension of $\Fq$.
+
+\sbs{Computing in the endomorphism ring modulo $\ell$}{}
+
+The issue of choosing an appropriate $\ell$-torsion point may be addressed by avoiding the choice altogether, instead operating directly with the endomorphisms in \cref{char_ell}, performing all necessary computations in the endomorphism ring $\End(E[\ell])$.
+
+To this end, we will describe how to canonically represent elements of this endomorphism ring, thus allowing us to easily verify whether \cref{char_ell} holds for a particular test value of $t_\ell$. We also describe how to perform operations on elements of the endomorphism ring which are represented in this way.
+
+Let
+\begin{eqn}{}
+\alpha \defeq (\alpha_x, \alpha_y y) \in \End(E)
+\end{eqn}
+be an endomorphism of $E$ in canonical form, where $\alpha_x, \alpha_y \in \Fq(x)$. A canonical representation for the restriction $\alpha_\ell$ of $\alpha$ to $E[\ell]$ is obtained by using the $\ell$-th division polynomial $\psi_\ell \in \Fq[x]$. Recall that this polynomial has degree $(\ell^2 - 1) / 2$, and its roots are the $x$-coordinates of the points of order $\ell$ of $E$. Thus, assuming the denominators of $\alpha_x$ and $\alpha_y$ are relatively prime to $\psi_\ell$, we may reduce these rational functions modulo $\psi_\ell$ to obtain the representation
+\begin{eqn}{}
+\alpha_\ell = (\alpha_x \bmod \psi_\ell, (\alpha_y \bmod \psi_\ell) y).
+\end{eqn}
+
+If the denominator of either $\alpha_x$ or $\alpha_y$ has some non-constant greatest divisor $\psi'_\ell$ in common with $\psi_\ell$, then we fail to represent $\alpha_\ell$ in this form. However, this means that there are points of degree $\ell$ in the kernel of $\alpha$, and hence the kernel of $\alpha_\ell$ is a non-trivial subgroup $E[\ell]'$ of $E[\ell]$. Since $E[\ell]$ has order $\ell^2$, this subgroup is either the whole of $E[\ell]$, in which case $\psi'_\ell = \psi_\ell$, or it has order $\ell$ and $\psi'_\ell$ has degree $(\ell - 1) / 2$, with roots corresponding to the $x$-coordinates of affine points in $E[\ell]'$.
+
+In the former case, $\alpha_\ell$ is the zero endomorphism on $E[\ell]$, for which we may choose some unique representation. In the latter case, we may perform all subsequent computations in $\End(E[\ell]')$, since these endomorphisms still satisfy the characteristic equation \cref{char_ell}. Canonical representations for the restrictions of endomorphisms to $E[\ell]'$ are obtained by reducing modulo $\psi'_\ell$ instead.
+
+Note that all endomorphisms will be representable in this form, since the only endomorphisms for which non-invertible denominators will occur are those restricting to the zero endomorphism on $E[\ell]'$. Henceforth we will only refer to $\psi_\ell$ and $E[\ell]$, with the understanding that they are to be replaced by some $\psi'_\ell$ and $E[\ell]'$ if necessary.
+
+Given two non-zero endomorphisms $\alpha_\ell$ and $\beta_\ell$ of $E[\ell]$ in canonical form, we may compute their sum and product as usual, respectively by applying the group law of the elliptic curve and by composition of endomorphisms.
+
+Composition yields the endomorphism with canonical form
+\begin{eqn}{}
+\alpha_\ell \beta_\ell = (\alpha_x \circ \beta_x \bmod \psi_\ell , ((\alpha_y \circ \beta_x) \beta_y \bmod \psi_\ell) y).
+\end{eqn}
+Note that since $\alpha_\ell$ and $\beta_\ell$ are in canonical form, their kernels must be trivial, and so the kernel of $\alpha_\ell \beta_\ell$ is trivial, thus ensuring that no non-invertible denominators occur.
+
+Computing $\gamma_\ell \defeq \alpha_\ell + \beta_\ell$ by applying the group law of $E$ yields
+\begin{align*}
+\gamma_x &= m^2 - \alpha_x - \beta_x \bmod \psi_\ell \\
+\gamma_y &= \frac{m}{y} (\alpha_x - \gamma_x) - \alpha_y \bmod \psi_\ell,
+\end{align*}
+where
+\[
+m = \begin{cases}
+\frac{\alpha_y - \beta_y}{\alpha_x - \beta_x} y & \text{if $\alpha_x \neq \beta_x$} \\
+\frac{3\alpha_x^2 + A}{2 \alpha_y y} & \text{if $\alpha_\ell = \beta_\ell$}
+\end{cases}.
+\]
+Note that $\gamma_x$ and $\gamma_y$ are functions in $x$ only, since both contain only square factors of $y$. Furthermore, note that in the case $\alpha_\ell = \beta_\ell$, no non-invertible denominators will occur, since $\alpha_\ell$ has a trivial kernel and $\ell$ is odd, so that $[2] \alpha_\ell$ has a trivial kernel. Therefore, the only case where we need to check for non-invertible denominators is the case $\alpha_x \neq \beta_x$.
+
+\cref{alg:frob_mod_l} gives Sage code for computing the trace of Frobenius modulo $\ell$. Since Sage does not have a full implementation of elliptic curve endomorphism rings, with endomorphism rings of torsion subgroups entirely lacking, code has been written to fill this gap. The interested reader may refer to \cref{chp:sage_endo} for the relevant code -- its complexity has been abstracted away intentionally in the present section, since it would distract from the essence of the algorithm. We only point out the detail that the last two lines of \cref{alg:frob_mod_l} are responsible for replacing $\psi_\ell$ with a divisor if a non-invertible denominator is encountered.
+
+\begin{alg}{Trace of Frobenius modulo $\ell$}{frob_mod_l}
+\begin{sagecode}
+def trace_of_frobenius_mod(E, l):
+    """
+    E: an elliptic curve
+    l: a prime number
+    """
+    psi_l = E.division_polynomial(l)
+    q_l = E.base_field().order() % l
+    t_l = 0
+    while true:
+        try:
+            phi = FrobeniusEndomorphismMod(E, psi_l)
+            lhs = phi^2 + q_l
+            rhs = t_l * phi
+            while t_l <= (l - 1) // 2:
+                if lhs == rhs:
+                    return t_l
+                elif lhs == -rhs:
+                    return -t_l
+                t_l += 1
+                rhs += phi
+        except ZeroDivisionError as e:
+            psi_l = e[0]
+\end{sagecode}
+\end{alg}
+
+\sbs{Time complexity analysis}{}
+
+Now that we have made the rules for computing in the endomorphism ring of $E[\ell]$ explicit, we can analyse the time complexity of Schoof's algorithm. In the worst case, we perform all computations in the full endomorphism ring of $E[\ell]$, never finding a factor of $\psi_\ell$. The computation of $\phi_{q;\ell}$, $\phi_{q;\ell}^2$ and $[q \bmod{\ell}]$ are done upfront, and can be made efficient by computing the components of $\phi_{q;\ell}$ and $\phi_{q;\ell}^2$ using a square-and-multiply algorithm, and by computing $[q \bmod{\ell}] = (q \bmod{\ell}) [1]$ using a double-and-add algorithm.
+
+For each prime $\ell$, we need to test at most $\ell$ values for $t_\ell$, requiring a total of $O(\ell)$ additions in the endomorphism ring. For each addition, we perform a constant number of operations using polynomials of degree $O(\ell^2)$ in the polynomial ring $\Fq[x]$, the most expensive of which is computing the multiplicative inverse modulo $\psi_\ell$. Under the assumption that $\log \ell \in O(\log q)$, which it clearly is, this requires $O(M(\ell^2 \log q) \log \ell)$ operations using the extended Euclidean algorithm, where $\Theta(M(n))$ is the time complexity of the algorithm used for multiplying two $n$-bit integers \citep{Sutherland}.
+
+The last ingredient in the time complexity analysis is to obtain asymptotic estimates for the number of primes $k$ and the largest prime $\ell_k$ used in the algorithm. Recall the \emph{prime number theorem}, which gives the asymptotic formula $\pi(x) \sim \frac{x}{\log x}$ for the prime-counting function $\pi$. An equivalent form of the prime number theorem is that the Chevyshev function
+\[
+\vartheta(x) \defeq \sum_{p \leq x} \log p,
+\]
+has the asymptotic formula $\vartheta(x) \sim x$ \citep{Apostol}. Since we have chosen the product of primes $N_k$ so that $\log N_k = \vartheta(\ell_k)$, we have $\ell_k \sim \log N_k \sim \frac{1}{2} \log q$, and furthermore we then have $k = \pi(\ell_k) \sim \frac{\log q}{2 \log \log q}$.
+
+Substituting these asymptotic formulae for $\ell_k$ and $k$ yields a total time complexity of
+\[
+O(M((\log q)^3) (\log q)^2)
+\]
+for Schoof's algorithm. Using schoolbook multiplication gives a time complexity of $O((\log q)^8)$, but this can be brought down to $\tilde{O}((\log q)^5)$ if the Sch\"onhage-Strassen algorithm, with time complexity $M(n) \in O(n \log n \log \log n)$, is used instead. However, the constants in the latter multiplication algorithm are very large, so that other multiplication algorithms are typically more efficient for the values of $q$ currently used in cryptographic applications \citep{Sutherland}.
+
+%Note that the use of Hasse's theorem is not strictly necessary for the efficiency of this algorithm. The trace of Frobenius is trivially bounded by $-p \leq t \leq p$. Even when using $N > 2p$, we have $p_k \sim \log q$ and $k \sim \frac{\log q}{\log \log q}$, thus yielding the same time complexity.

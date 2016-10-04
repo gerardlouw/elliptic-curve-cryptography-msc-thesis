@@ -1,0 +1,32 @@
+% !TEX root = ../../ecc.tex
+
+\sbs{Weierstrass form}{}
+
+An elliptic curve $E$ over a field $K$ can be defined as a smooth plane curve specified by the Weierstrass equation
+\begin{eqn} E : y^2 + a_1xy + a_3y = x^3 + a_2x^2 + a_4x + a_6, \end{eqn}
+with coefficients in $K$, along with a point at infinity $O$. The numbering of the coefficients here is not arbitrary, and is of historic significance \citep{book:Arithmetic}.
+
+If the field $K$ is such that $\rchar(K) \neq 2$, then this equation can be simplified to %TODO how?
+\begin{eqn} E : y^2 = 4x^3 + b_2x^2 + 2b_4x + b_6. \end{eqn}
+If furthermore $\rchar(K) \neq 3$, an even simpler equation
+\begin{eqn}[weierstrass_simple] E : y^2 = x^3 - 27c_4x - 54c_6 \end{eqn}
+can be obtained \citep{book:Arithmetic,book:Koblitz}. %TODO how?
+
+For the purposes of cryptography, we are primarily interested in elliptic curves defined over a finite field $\mathbb{F}_q$. There are two classes of fields which are often used in practice: the binary fields $\mathbb{F}_{2^k}$ with $k$ some large integer, and the prime fields $\mathbb{F}_p$ with $p$ some large prime number. Binary fields have the advantage of admitting efficient hardware implementations of their arithmetic operations. However, prime fields allow for a cleaner treatment of the theory, since the simplified Weierstrass equation \cref{eqn:weierstrass_simple} may be used. Therefore, our study will be focused on the prime case. Henceforth we will assume that $\rchar(K) \neq 2, 3$ unless specified otherwise, and so we will write a general elliptic curve in the form
+\begin{eqn}[weierstrass] E : y^2 = x^3 + ax + b. \end{eqn} \citep{book:Arithmetic,book:Koblitz}
+
+\sbs{Point multiplication}{}
+Given the group law on points of $E$, we can define multiplication of an elliptic curve point as follows.
+
+\begin{definition}
+Let $P$ be a point on an elliptic curve $E$ and let $n \in \mathbb{Z}$. Then we define the point multiplication $nP$ as follows. If $n = 0$, then $nP = O$, if $n > 0$, then
+\[nP = \underbrace{P + \cdots + P}_{\text{$n$ times}}\]
+and if $n < 0$, then $nP = (-n)(-P)$ \citep{book:Arithmetic}.
+\end{definition}
+
+Using a double-and-add algorithm, the point multiplication can be computed with a number of group law evaluations logarithmic in $n$, and hence a number of field operations logarithmic in $n$ (or polynomial in the number of bits of $n$) \citep{book:Arithmetic}.
+
+\sss{Elliptic curve discrete logarithm problem}{}
+The elliptic curve discrete logarithm problem involves finding the value of the integer $n$ given the points $P$ and $nP$. It is presumed that an efficient algorithm for solving this problem either does not exist, or is very difficult to write down. Currently, the fastest known algorithms for solving the elliptic curve discrete logarithm problem require a number of field operations of order $\sqrt{n}$ (or exponential in the number of bits of $n$) \citep{book:Arithmetic}.
+
+The presumed difficulty of the elliptic curve discrete logarithm problem is the essence behind the security of elliptic curve cryptosystems \citep{book:Arithmetic,book:Koblitz}.

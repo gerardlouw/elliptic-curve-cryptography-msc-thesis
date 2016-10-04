@@ -1,0 +1,55 @@
+\begin{dfn}{}{embed}
+The \emph{$m$-torsion embedding field} of $\un{K}$ is the extension $K_m \defeq K(\un{K}[m])$ of $K$ obtained by adjoining the elements of $\un{\bar{K}}[m]$. The \emph{$m$-torsion embedding degree} of $\un{K}$ is the degree $d_{\un{K};m} \defeq [K_m : K]$ of this extension.
+\end{dfn}
+
+%XXX The condition $\un{\bar{\F}_q}[m] \leq \un{\F_{q^d}}$ is equivalent to $m \mid q^d - 1$, thus giving an alternative definition for $d_{\un{\Fq};m}$. By Euler's theorem, there is an upper bound $d_{\un{\Fq};m} \leq \varphi(m)$.
+
+\begin{dfn}{}{tate}
+For $m \in \Z$ such that $\rchar(K) \nmid m$, the \emph{$m$-th Tate pairing} on $E$ is the mapping
+\begin{eqn}{}
+t_m : E(K_m)[m] \times E(K_m) / [m] E(K_m) \to \un{K_m} / (\un{K_m})^m
+\end{eqn}
+defined by
+\begin{align*}
+t_m(P, [\ptinfty]) &\defeq 1; \\
+t_m(P, [P]) &\defeq t_m(P, [P] + [Q]) / t_m(P, [Q]);\ \text{and} \\
+t_m(P, [Q]) &\defeq f_{P;m}(Q)
+\end{align*}
+for all $P \in E(\F_{q^d})[m]$ and $Q \in E(\F_{q^d}) \setminus \set{\ptinfty, P}$ \citep{Tate,Lichtenbaum}.
+\end{dfn}
+
+Note that in the above definition, $t_m(P, [P])$ is multiply defined for $P \in E(K_m)[m]$. However, the following theorem guarantees that these definitions coincide.
+
+\begin{thm}{}{tate_prop}
+Let $P \in E(K_m)[m]$ and $[Q] \in E(K_m) / [m] E(K_m)$. Then the Tate pairing $t_m$ satisfies the following properties:
+\begin{enumerate}[(a)]
+\item (Bilinear) if $P' \in E(K_m)[m]$ then $t_m(P + P', [Q]) = t_m(P, [Q]) t_m(P', [Q])$ and if $[Q'] \in E(\F_{K_m}) / [m] E(\F_{K_m})$ then $t_m(P, [Q] + [Q']) = t_m(P, [Q]) t_m(P, [Q'])$; and
+\item (Non-degenerate) if $t_m(P, [Q']) = 1$ for all $[Q'] \in E(K_m) / [m] E(K_m)$ then $P = \ptinfty$, and if $t_m(P', [Q]) = 1$ for all $P' \in E(K_m)[m]$ then $[Q] = [\ptinfty]$.
+\end{enumerate}
+\end{thm}
+\begin{proof}
+See Theorem~3.17 of \citep{Washington} for a proof of bilinearity and Section~11.7 of the same text for a proof of non-degeneracy.
+\end{proof}
+
+As with the Weil pairing, Miller's algorithm may fail to compute $f_{P;m}(Q)$ if $[k]P = Q$ for some $k = 1, \ldots, m-1$. Unlike the Weil pairing, this does not tell us the value of $f_{P;m}(Q)$, so we deal with the problem by selecting a random $R \in E(K_m)$ and computing $f_{P;m}(Q + R) / f_{P;m}(R)$ instead. On closer inspection of Miller's algorithm, one sees that there are only $\Theta(\log m)$ points $Q \in E(K_m)$ for which the computation of $f_{P;m}(Q)$ will fail for a fixed $P$, so the expected number of evaluations of Miller's algorithm is $\Theta(1)$, for an overall expected time complexity of $\Theta(\log m)$ operations in $K_m$. Sage code for computing the $m$-th Tate pairing on $E$ is given in \cref{alg:tate}.
+
+\begin{alg}{Tate pairing}{tate}
+\begin{sagecode}
+def tate_pairing(E, m, P, Q):
+    """
+    E: an elliptic curve
+    m: a positive integer
+    (P, Q): m-torsion points on E
+    """
+    if Q == 0:
+        return 1
+    if P == Q:
+        R = E.random_point()
+        return tate_pairing(E, m, P, P + R) / tate_pairing(E, m, P, R)
+    try:
+        return miller(E, m, P, Q)
+    except ZeroDivisionError:
+        R = E.random_point()
+        return tate_pairing(E, m, P, Q + R) / tate_pairing(E, m, P, R)
+\end{sagecode}
+\end{alg}

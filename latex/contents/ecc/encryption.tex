@@ -1,0 +1,92 @@
+Suppose that Alice wishes to send Bob a message $m \in \msgs$ over a public network, in such a way that the contents can only be read by Bob. An \emph{encryption scheme} is a cryptosystem which consists of both an \emph{encryption} and a \emph{decryption} algorithm. The encryption algorithm allows one to use Bob's public key $K_A$ to transform the message $m$ into a \emph{cyphertext} $c$, from which someone can extract the original message $m$ using the decryption algorithm if and only if they have knowledge of Bob's secret key $s_B$.
+
+Since messages may be arbitrarily long, we will break $m$ up into a sequence of messages of some specified maximum length, each of which is then to be encrypted individually. Thus, we assume without loss of generality that $m \in \set{0,1}^k$ for some appropriately chosen $k$.
+
+We now describe two common variants of an encryption scheme known as \emph{ElGamal encryption}, first published in \citep{ElGamal}.
+
+\sbs{First variant}{var1}
+
+In the first variant, we restrict the message $m$ to have length at most $\log_2 \ell$ and then encode it as an element $m' \in \F_\ell$ by interpreting it as the binary representation of $m'$. A random element $e \in \un{\F_\ell}$ is then selected as an \emph{ephemeral key} -- a key which is used only for a single encryption procedure and then discarded. We compute the first part of the ciphertext as the point multiplication $C_1 \defeq [e] G$.
+
+The second part of the ciphertext is computed by additively perturbing the message $m'$ by the hash of the point multiplication $[e] K_B$. To this end, we use the empty message for the first argument of $H$ to turn it into a hash function on $V$ only. Concretely, we set $c_2 \defeq m' + H(\emptyset, [e] K_B)$ for the second part of the ciphertext, yielding the full ciphertext $C \defeq (C_1, c_2)$. Sage code for the encryption procedure is given in \cref{alg:elgamal_encrypt_var1}.
+
+\begin{alg}{ElGamal encryption (first variant)}{elgamal_encrypt_var1}
+\begin{sagecode}
+def elgamal_encrypt(m, K_B, G, l):
+    """
+    m: the message (encoded as an element of GF(l))
+    K_B: Bob's public key
+    G: the base point
+    l: the order of G
+    """
+    e = randint(1, l - 1)
+    C_1 = e * G
+    c_2 = (m + hash(e * K_B)) % l
+    return C_1, c_2
+\end{sagecode}
+\end{alg}
+
+The decryption procedure for this variant proceeds by simply computing $c_2 - H(\emptyset, [s_B] C_1)$. This clearly yields $m'$, since $[s_B] C_1 = [s_B e] G = [e] K_B$. \cref{alg:elgamal_decrypt_var1} gives the Sage code for the decryption procedure.
+
+\begin{alg}{ElGamal decryption (first variant)}{elgamal_decrypt_var1}
+\begin{sagecode}
+def elgamal_decrypt((C_1, c_2), s_B, l):
+    """
+    (C_1, c_2): the ciphertext
+    s_B: Bob's secret key
+    l: the order of the base point
+    """
+    return (c_2 - hash(s_B * C_1)) % l
+\end{sagecode}
+\end{alg}
+
+Note that given knowledge of the system parameters, $[e] G$ and $K_B$, computing $[s_B e] G$ without knowing $s_B$ requires solving the Diffie-Hellman problem. Thus, without $[s_B]$, we cannot compute $H(\emptyset, [e] K_B)$ efficiently. Thus, assuming that $H$ yields a value which is indistinguishable from an element selected uniformly at random from $\F_\ell$ when the input is uniformly distributed, $c_2$ is also indistinguishable from a uniformly distributed element of $\F_\ell$, and thus $m'$ cannot be recovered.
+
+\begin{rmk}{}{}
+The importance of not reusing the ephemeral key $e$ should be emphasised. If Alice uses the same value of $e$ to encrypt two messages $m$ and $\bar{m}$ to Bob, then their respective representations $m'$ and $\bar{m}'$ will be perturbed by the same hash, namely $H(\emptyset, [e] K_B)$. Computing $C_1 - \bar{C}_1$ then yields $m' - \bar{m}'$, which is certainly no longer guaranteed to be indistinguishable from a uniformly distributed element of $\F_\ell$. Furthermore, if someone discovers the contents of at least one message, all other messages which were encrypted using the same value of $e$ become fully known. An attacker may even ask Alice to encrypt a specific message using Bob's public key, in what is known as a \emph{chosen-message attack}, thereby rendering all other messages encrypted with the same ephemeral key known.
+\end{rmk}
+
+\sbs{Second variant}{var2}
+
+The second variant of the ElGamal encryption scheme avoids using a hash function by encoding $m$ as an $\Fq$-point on the group variety $V$. The approach followed for representing $m$ as an element of $V$ depends on the type of group.
+
+Elements of the group variety $\un{\Fq}$ may be encoding using a straightforward process. We restrict $m$ to have length at most $\log_2 q$, which we interpret as the binary representation of an integer. The encoding of $m$ is then taken to be the element of $\un{\Fq}$ whose polynomial representation has the $p$-ary digits of this integer as its coefficients. This does not yield an element of $\un{\Fq}$ for the message whose bits are all zero, but we may encode this message as the element of $\un{\Fq}$ whose polynomial representation has $p - 1$ as all of its coefficients, since no other message will be encoded to this element as long as $p$ is odd.
+
+For an elliptic curve $E / \Fq$, we suggest a probabilistic approach for encoding messages. This approach fails to encode a given message with a probability of about $2^{-k}$, where $k$ is a parameter of the encoding scheme. Here we restrict $m$ to have length at most $\log_2 q - k$, which we use as the least significant bits in a binary sequence with $\lfloor \log_2 q \rfloor$ bits in total. The $k$ most significant bits of this binary sequence are then chosen randomly, with the resulting sequence being interpreted as an element $x \in \Fq$ as described for the group $\un{\Fq}$, but without interpreting the sequence of zero bits specially. The $k$ randomly chosen bits are simply ignored during the decoding procedure.
+
+The element of $\Fq$ selected in this way may either fail to be the $x$-coordinate of a point on the elliptic curve or such a point may not be in the subgroup $\langle G \rangle$ of $E(\Fq)$, in which case we repeat the procedure. The former happens exactly when $\legendre{f(x)}{\F_q} = -1$, which has a probability of about $1 / 2$. The latter has a probability of exactly $\ell / \#E(\Fq)$. Thus, we expect to have to randomly select $k$ bits about $2\#E(\Fq) / \ell$ times, which is in $\Theta(1)$ under the assumption $\ell \in \Theta(\#E(\Fq))$. As previously mentioned, there is a probability of about $2^{-k}$ that no point in $\langle G \rangle$ will have $m$ as the least significant bits of its $x$-coordinate, in which case we fail to encode $m$.
+
+Once the $x$-coordinate of a point in $\langle G \rangle$ has been found, we may compute the square roots of $f(x)$ and randomly select one of them as its $y$-coordinate, thus obtaining a point $M$ to use as the encoding of $m$. Alternatively, we may encode messages which are one bit longer by using the extra bit to decide which of the square roots of $f(x)$ to use as the encoding of the message.
+
+The encryption algorithm proceeds in a similar fashion to the first variant. An ephemeral key $e \in \un{\F_\ell}$ is selected at random, the point multiplications $C_1 \defeq [e] G$ and $[e] K_B$ are calculated, and the message is additively perturbed to $C_2 \defeq M + [e] K_B$. The pair $(C_1, C_2)$ then serves as the ciphertext. Sage code for this procedure is given in \cref{alg:elgamal_encrypt_var2}.
+
+\begin{alg}{ElGamal encryption (second variant)}{elgamal_encrypt_var2}
+\begin{sagecode}
+def elgamal_encrypt(M, K_B, G, l):
+    """
+    M: the message (encoded as a multiple of G)
+    K_B: Bob's public key
+    G: the base point
+    l: the order of G
+    """
+    e = randint(1, l - 1)
+    C_1 = e * G
+    C_2 = M + e * K_B
+    return C_1, C_2
+\end{sagecode}
+\end{alg}
+
+The decryption procedure then simply computes $C_2 - [s_B] C_1$, which yields the message $M$ since $[s_B] C_1 = [s_B e] G = [e] K_B$. The Sage code for decryption is given in \cref{alg:elgamal_decrypt_var2}.
+
+\begin{alg}{ElGamal decryption (second variant)}{elgamal_decrypt_var2}
+\begin{sagecode}
+def elgamal_decrypt((C_1, C_2), s_B):
+    """
+    (C_1, C_2): the ciphertext
+    s_B: Bob's secret key
+    """
+    return C_2 - s_B * C_1
+\end{sagecode}
+\end{alg}
+
+The second variant once again relies on the Diffie-Hellman problem so that it is difficult to compute $[e] K_B$ from $C_1$ and $K_B$. Its security also relies on the assumption that given $C_1$, the point $[e] K_B$ is indistinguishable from a uniformly distributed point in $\langle G \rangle$ without knowledge of $s_B$, so that $M + [e] K_B$ is therefore indistinguishable from a uniformly distributed point.

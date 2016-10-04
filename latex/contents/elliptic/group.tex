@@ -1,0 +1,88 @@
+Central to the utility of elliptic curves in cryptography is the fact that the $L$-points on an elliptic curve may be endowed with an abelian group structure which allows efficient computation. The following theorem describes this group structure.
+
+\begin{thm}{}{group_structure}
+Let $E$ be an elliptic curve over $K$ in Weierstrass form. The points in $E(L)$ form an abelian group with $\ptinfty$ as its identity element, negation of an affine point $P \in E(L)$ defined by
+\begin{eqn}{}
+-P \defeq
+%\begin{cases}
+%(x_P, y_P + x_P) & \textnormal{if $\rchar(K) = 2$} \\
+(x_P, -y_P) %& \textnormal{if $\rchar(K) \neq 2, 3$}
+%\end{cases}
+\end{eqn}
+and addition of two affine points $P, Q \in E(L)$ such that $P \neq -Q$ defined by
+\begin{eqn}{}
+P + Q \defeq
+%\begin{cases}
+%(m^2 + m + x_P + x_Q, (m + 1) x_{P+Q} + c) & \textnormal{if $\rchar(K) = 2$} \\
+%(m^2 - x_P - x_Q, -m x_{P+Q} - c) & \textnormal{if $\rchar(K) \neq 2, 3$},
+(m_{P,Q}^2 - x_P - x_Q, -m_{P,Q} x_{P+Q} - c_{P,Q}),
+%\end{cases}
+\end{eqn}
+where
+\begin{eqn}{}
+m_{P,Q} \defeq
+\begin{cases}
+%(x_P^2 + y_P) / x_P & \textnormal{if $\rchar(K) = 2$ and $P = Q$} \\
+%(3 x_P^2 + a_4) / 2 y_P & \textnormal{if $\rchar(K) \neq 2, 3$ and $P = Q$} \\
+(3 x_P^2 + a_4) / 2 y_P & \textnormal{if $P = Q$} \\
+(y_Q - y_P) / (x_Q - x_P) & \textnormal{if $P \neq Q$}
+\end{cases}
+\end{eqn}
+and
+\begin{eqn}{}
+c_{P,Q} \defeq
+\begin{cases}
+%x_P^2 & \textnormal{if $\rchar(K) = 2$ and $P = Q$} \\
+%(-x_P^3 + a_4 x_P + 2 a_6) / 2 y_P & \textnormal{if $\rchar(K) \neq 2, 3$ and $P = Q$} \\
+(-x_P^3 + a_4 x_P + 2 a_6) / 2 y_P & \textnormal{if $P = Q$} \\
+(x_Q y_P - x_P y_Q) / (x_Q - x_P) & \textnormal{if $P \neq Q$}.
+\end{cases}
+\end{eqn}
+\end{thm}
+
+It is clear from the formulae in \cref{thm:group_structure} that addition in $E(L)$ is commutative, and it is straightforward to verify that $E(L)$ is closed under negation and addition by plugging the respective formulae into the elliptic curve's Weierstrass equation. However, it is somewhat tedious to demonstrate that addition in $E(L)$ is associative. We refer the reader to Section~2.4 of \citep{Washington} for a proof of associativity.
+
+It can also be shown that the maps $- : E \to E$ and $+ : E \times_K E \to E$ are $K$-morphisms, so that elliptic curves are in fact abelian varieties since $\ptinfty$ is furthermore a $K$-point.
+
+The group structure of an elliptic curve has a useful geometric interpretation. By B\'{e}zout's theorem, the line passing through two $L$-points of a cubic projective plane curve will meet the curve in exactly one other $L$-point, when counting with multiplicity. Thus, the line passing through a point $P \in E(L)$ and $\ptinfty$ meets $E$ at a unique $L$-point, which is the point $-P$. The quantities $m_{P,Q}$ and $c_{P,Q}$ in \cref{thm:group_structure} are respectively the slope and the intercept of the line passing through the points $P$ and $Q$, which meets $E$ at the point $-(P + Q)$, so that the sum $P + Q$ is the third intersection point of $E$ and the line passing through $-(P + Q)$ and $\ptinfty$. \cref{fig:addition} depicts the geometric interpretation of group addition on elliptic curves over $\Q$ for both the cases $P = Q$ and $P \neq Q$.
+
+\begin{sagesilent}
+G1 = Graphics()
+E1 = EllipticCurve(QQ, [-2, 0])
+G1 += plot(E1)
+G1 += point2d((-1, -1)); G1 += text("$P$", (-1 - 0.2, -1), horizontal_alignment="right")
+G1 += point2d((0, 0)); G1 += text("$Q$", (0 - 0.2, 0 + 0.2), horizontal_alignment="right", vertical_alignment="bottom")
+G1 += point2d((2, 2)); G1 += text("$-(P + Q)$", (2 - 0.2, 2), horizontal_alignment="right")
+G1 += point2d((2, -2)); G1 += text("$P + Q$", (2 - 0.2, -2), horizontal_alignment="right")
+G1 += line2d([(-2, -2), (3, 3)], linestyle=":")
+G1 += line2d([(2, -3), (2, 3)], linestyle=":")
+
+G2 = Graphics()
+E2 = EllipticCurve(QQ, [-1, 1])
+G2 += plot(E2)
+G2 += point2d((1, 1)); G2 += text("$P$", (1, 1 + 0.2), vertical_alignment="bottom")
+G2 += point2d((-1, -1)); G2 += text("$-[2]P$", (-1 - 0.2, -1), horizontal_alignment="right")
+G2 += point2d((-1, 1)); G2+= text("$[2]P$", (-1 - 0.2, 1), horizontal_alignment="right")
+G2 += line2d([(-2, -2), (2, 2)], linestyle=":")
+G2 += line2d([(-1, -3), (-1, 3)], linestyle=":")
+\end{sagesilent}
+
+\begin{fig}{Addition on elliptic curves over $\Q$}{addition}
+\centering
+\begin{subfigure}[t]{0.5\linewidth}
+\centering
+\sageplot{G1, figsize=[3, 3.6], xmin=-2, xmax=3, ymin=-3, ymax=3}
+\caption{$E : y^2 = x^3 - 2x$, $P = (-1, -1)$,\newline$Q = (0, 0)$}
+\end{subfigure}
+\begin{subfigure}[t]{0.4\linewidth}
+\centering
+\sageplot{G2, figsize=[2.4, 3.6], xmin=-2, xmax=2, ymin=-3, ymax=3}
+\caption{$E : y^2 = x^3 - x + 1$, $P = (1, 1)$}
+\end{subfigure}
+\end{fig}
+
+There is another important interpretation of the group structure on an elliptic curve. It can be shown that there is an isomorphism of abelian varieties
+\begin{eqn}{}
+E \to J_E, \quad P \mapsto (P) - (\ptinfty),
+\end{eqn}
+where $J_E \defeq \Div^0(E) / \Prin(E)$ denotes the \emph{Jacobian variety} of $E$. %TODO give ref

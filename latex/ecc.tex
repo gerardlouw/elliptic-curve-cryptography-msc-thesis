@@ -1,0 +1,174 @@
+%%% usthesis
+\documentclass[12pt,oneside,openany,a4paper,afrikaans,english]{memoir}
+\usepackage[masters-t, goldenblock]{usthesis}
+
+%%% language and fonts
+\usepackage{babel}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\include{commands/language}
+
+%%% math
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{usnomencl}
+\usepackage{mathrsfs}
+\include{commands/math}
+
+%%% algorithms
+\usepackage{minted}
+\usepackage{algorithm}
+\usepackage{listings}
+\usepackage[scaled]{beramono}
+%\usepackage{luximono}
+\newminted{sage}{linenos,fontsize=\small}
+\usepackage{sagetex}
+\usepackage{chngcntr}
+\counterwithin{algorithm}{chapter}
+
+%%% graphics
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{eso-pic}
+\newcommand*{\WaterMark}[2][0.2\paperwidth]{%
+    \AddToShipoutPicture*{\AtTextCenter{%
+        \parbox[c]{0pt}{\makebox[0pt][c]{%
+            \includegraphics[width=#1]{#2}}}}}}
+\usepackage{tikz}
+\usepackage{subcaption}
+
+%%% bibliography
+\usepackage{usbib}
+\usepackage[hidelinks]{hyperref}
+
+%%% cross-referencing
+%\usepackage{varioref} %gives references to page numbers, use \vref, is also made clever
+\usepackage{thmtools,nameref}
+\usepackage[capitalise,noabbrev]{cleveref}
+\usepackage{ifthen}
+\usepackage{usbib}
+\crefname{appchp}{Appendix}{Appendices}
+\include{commands/referencing}
+
+%%% structure
+\usepackage{enumerate}
+\maxsecnumdepth{subsubsection}
+\maxtocdepth{section}
+%\renewcommand{\labelenumi}{(\alph{enumi})}
+\setcounter{tocdepth}{2}
+
+%%% options
+\OnehalfSpacing
+
+%%% title page
+\faculty{\AorE{Fakulteit Natuurwetenskappe}{Faculty of Science}}
+\address{\AorE{
+    Departement Wiskundige Wetenskappe,\\
+    Universiteit Stellenbosch,\\
+    Privaatsak X1, 7602 Matieland, Suid-Afrika.
+    }{
+    Department of Mathematical Sciences,\\
+    Stellenbosch University,\\
+    Private Bag X1, 7602 Matieland, South Africa.
+    }
+}
+\author{G.J.\ Louw}{Gerard Jacques Louw}
+\setdate{10}{2016}
+\degree{\AorE{MSc (Wiskunde)}{MSc (Mathematics)}}
+{\AorE{Magister in die Natuurwetenskappe in Wiskunde}{Master of Science in Mathematics}}
+\supervisor{Prof.\ F.\ Breuer}
+\title{\AorE{Elliptiese Kurwe Kriptografie\\[1ex] \normalfont\small\itshape(‘‘Elliptic curve cryptography’’)}{Elliptic curve cryptography}}
+\ThesisDescript{Thesis presented in partial fulfilment of the requirements for the degree of Master of Science in Mathematics in the Faculty of Science at Stellenbosch University
+\\~\\~\\~\\~\\~\\~\\~\\~\\
+\small{The financial assistance of the National Research Foundation (NRF) towards this research is hereby acknowledged. Opinions expressed and conclusions arrived at, are those of the author and are not necessarily to be attributed to the NRF.}}
+
+\begin{document}
+
+\begin{sagesilent}
+import matplotlib
+matplotlib.rc("font", **{"sans-serif" : "Computer Modern Roman", "family" : "serif"})
+plot.options["rgbcolor"] = (0, 0, 0)
+plot.options["aspect_ratio"] = 1
+plot.options["fig_tight"] = False
+point2d.options["rgbcolor"] = (0, 0, 0)
+point2d.options["size"] = 20
+line2d.options["rgbcolor"] = (0, 0, 0)
+text.options["rgbcolor"] = (0, 0, 0)
+\end{sagesilent}
+
+\frontmatter
+
+\begin{SingleSpace}
+  \WaterMark{UScrest-WM}
+  \TitlePage
+\end{SingleSpace}
+
+\DeclarationSign{}
+\DeclarationPage
+
+\pagebreak
+\begin{abstract}
+In this thesis we present a selection of Diffie-Hellman cryptosystems, which were classically formulated using the multiplicative group of a finite field, but which may be generalised to use other group varieties such as elliptic curves. We also describe known attacks on special cases of such cryptosystems, which manifest as solutions to the discrete logarithm problem for group varieties, and the elliptic curve discrete logarithm problem in particular. We pursue a computational approach throughout, with a focus on the development of practical algorithms.
+\end{abstract}
+
+\chp{Acknowledgements}{acknowledgements}
+
+\pagebreak
+\tableofcontents
+
+\pagebreak
+\listoffigures
+\listofalgorithms
+\addcontentsline{toc}{chapter}{List of Algorithms}
+
+\chp{Notation}{notation}
+
+\mainmatter
+
+\chp{Introduction}{intro}
+\chp{Elliptic curves}{elliptic}
+  \sec{Weierstrass equations}{weierstrass}
+  \sec{Group structure}{group}
+  \sec{Functions and morphisms}{functions}
+  \sec{Torsion}{torsion}
+  \sec{The dual isogeny}{dual}
+  \sec{The Frobenius endomorphism}{frobenius}
+  \sec{Hasse's theorem}{hasse}
+\chp{Pairings}{pairings}
+  \sec{Miller's algorithm}{miller}
+  \sec{The Weil pairing}{weil}
+  \sec{The Tate pairing}{tate}
+%\chp{Hyperelliptic curves}{hyperelliptic}
+  %\sec{Mumford representation}{mumford} %TODO
+  %\sec{Cantor's algorithm}{cantor} %TODO
+\chp{Point counting}{count}
+  \sec{Naive methods}{naive}
+  \sec{Schoof's algorithm}{schoof}
+\chp{Discrete logarithms}{discrete_logs}
+  \sec{The discrete logarithm and Diffie-Hellman problems}{dlp}
+  \sec{The baby-step giant-step algorithm}{baby_step}
+  \sec{The Pohlig-Hellman reduction}{pohlig}
+  \sec{Pollard's algorithms}{pollard}
+  \sec{Pairing-based reductions}{pairing}
+  \sec{Anomalous curve reduction}{anomalous}
+\chp{Elliptic curve cryptography}{ecc}
+  \sec{Diffie-Hellman key generation}{keygen}
+  \sec{Diffie-Hellman key-agreement scheme}{agreement}
+  \sec{ElGamal encryption scheme}{encryption}
+  \sec{Schnorr signature scheme}{signature}
+%\chp{Side channel attacks}
+  %\sec{Edwards equations}{edwards} %TODO
+\chp{Conclusion}{conclusion}
+\begin{appendices}
+\crefalias{chapter}{appchp}
+\chp{Computing in the endomorphism ring modulo $\ell$}{sage_endo}
+\end{appendices}
+%TODO endomorphism ring code appendix
+
+\backmatter
+
+\bibliographystyle{usmeg-a}
+\bibliography{ecc}
+
+\end{document}

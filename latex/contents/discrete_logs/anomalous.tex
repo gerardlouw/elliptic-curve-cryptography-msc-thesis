@@ -1,0 +1,54 @@
+\begin{dfn}{}{}
+$E / \Fq$ is said to be an \emph{anomalous} elliptic curve if and only if $\#E(\Fq) = q$.
+\end{dfn}
+
+In the present section, we discuss an approach due to \citep{Smart} for reducing the discrete logarithm problem on a subgroup $\langle G \rangle$ of order $p$ of an anomalous elliptic curve $E / \Fq$ to the discrete logarithm problem on the additive group $\Fp^+$, which may be solved with time complexity polynomial in $\log p$.
+
+In our discussion, we focus on the case of an elliptic curve $E / \Fp$, but similar results may be derived for the more general case of $E / \Fq$ \citep{Washington}.
+
+To apply the reduction, we first find a $p$-adic lift $\tilde{E} / \Qp$ of our elliptic curve. That is, we choose $\tilde{a}_4, \tilde{a}_6 \in \Qp$ such that $\tilde{a}_4 \equiv a_4 \pmod{p}$ and $\tilde{a}_6 \equiv a_6 \pmod{p}$, yielding the elliptic curve $\tilde{E} : y^2 = x^3 + \tilde{a}_4 x + \tilde{a}_6$. We similarly compute $p$-adic lifts $\tilde{G}, \tilde{P} \in \tilde{E}(\Qp)$ whose coordinates reduce to the respective coordinates of $G$ and $P$ modulo $p$, which can be achieved using \emph{Hensel's lemma}.
+
+The following theorem gives an explicit isomorphism from $E(\Fp)$ to $\Fp^+$ by passing through the $p$-adic lift $\tilde{E}(\Qp)$.
+
+\begin{thm}{}{elliptic_log}
+There exists a function $\vartheta_p : [p] \tilde{E}(\Qp) \to \Qp$, called the \emph{$p$-adic elliptic logarithm}, with the properties
+\begin{enumerate}[(a)]
+\item $\vartheta_p([p] \tilde{P}) \equiv 0 \pmod{p}$
+\item $\vartheta_p([p] \tilde{P}) \equiv - \frac{([p] \tilde{P})_x}{([p] \tilde{P})_y} \pmod{p^2}$
+\item The map
+\[E(\Fp) \to \Fp^+, \quad P \mapsto \frac{\vartheta_p([p] \tilde{P})}{p} \bmod{p}, \]
+where $\tilde{P}$ is a $p$-adic lift of $P$, is an isomorphism.
+\end{enumerate}
+\end{thm}
+\begin{proof}
+See Section~V.3 of \citep{BlakeSeroussiSmart}.
+\end{proof}
+
+The isomorphism in \cref{thm:elliptic_log} is efficiently computable since we only need to store the results of calculations up to two $p$-adic digits. The reduction of the discrete logarithm to $\Fp^+$ may then be solved by computing $\log_G P = a / g$ in $\Fp$, where $a$ and $g$ are the images of $P$ and $G$ respectively under the isomorphism.
+
+\begin{alg}{Anomalous curve reduction}{anomalous}
+\begin{sagecode}
+def elliptic_log(E, P):
+    """
+    E: an elliptic curve over GF(p)
+    P: a point on E
+    """
+    p = E.base_field().order()
+    Ep = E.base_extend(QQ).base_extend(Qp(p, 2))
+    P_tilde = Ep.lift_x(ZZ(P[0]) + p * randint(0, p - 1))
+    if P_tilde[1].residue() != P[1]:
+        P_tilde *= -1
+    return -(p * P_tilde)[0] / (p * P_tilde)[1]
+
+def anomalous_curve_reduction(G, P, E):
+    """
+    G: a point on E of order p
+    P: a multiple of G
+    E: an elliptic curve over GF(p)
+    """
+    p = E.base_field().order()
+    a = (elliptic_log(E, P) // p).residue()
+    g = (elliptic_log(E, G) // p).residue()
+    return ZZ(a / g)
+\end{sagecode}
+\end{alg}

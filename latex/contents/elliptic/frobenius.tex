@@ -1,0 +1,29 @@
+\begin{dfn}{}{}
+The \emph{Frobenius endomorphism} of an elliptic curve $E / \Fq$ is defined as
+\[
+\phi_q \defeq (x^q, y^q),
+\]
+which has the canonical form $(x^q, f^\frac{q-1}{2} y)$.
+\end{dfn}
+
+To see that $\phi_q$ is indeed an endomorphism, note that $\phi_q(-P) = -\phi_q(P)$ for all $P \in E$ since $q$ is odd, and furthermore
+\begin{align*}
+\phi_q(P + Q) &= (m_{P,Q}^{2q} - x_P^q - x_Q^q, -m_{P,Q}^q x_{P+Q}^q - c_{P,Q}^q) \\
+&= (m_{\phi_q P,\phi_q Q}^2 - x_{\phi_q P} - x_{\phi_q Q}, -m_{\phi_q P,\phi_q Q} x_{\phi_q(P + Q)} - c_{\phi_q P,\phi_q Q}) \\
+&= \phi_q P + \phi_q Q,
+\end{align*}
+where $m_{P, Q}^q = m_{\phi P, \phi Q}$ and $c_{P, Q}^q = c_{\phi P, \phi Q}$ since these are expressions involving only the coordinates of $P$ and $Q$, and elements of $\Fq$ which are fixed under exponentiation by $q$.
+
+\begin{thm}{}{frob_prop}
+The Frobenius endomorphism $\phi_q$ is an inseparable isogeny of degree $q$.
+\end{thm}
+\begin{proof}
+Since $\phi_{q;x} = x^q \in \Fq(x^p)$, this follows from \cref{thm:iso_crit}.
+\end{proof}
+
+\begin{thm}{}{one_min_frob_prop}
+$[1] - \phi_q$ is a separable isogeny of degree $\#E(\Fq)$.
+\end{thm}
+\begin{proof}
+Since $[1]$ is separable by \cref{thm:mul_prop} and $\phi_q$ is inseparable by \cref{thm:frob_prop}, the separability of $[1] - \phi_q$ follows from \cref{thm:insep_sum}. Furthermore, $([1] - \phi_q)(x, y) = \ptinfty$ if and only if $x = x^q$ and $y = y^q$, which is equivalent to $x, y \in \Fq$, so that $\ker([1] - \phi_q) = E(\Fq)$. It then follows from \cref{thm:sep_ker_deg} that $\deg([1] - \phi_q) = \#E(\Fq)$.
+\end{proof}

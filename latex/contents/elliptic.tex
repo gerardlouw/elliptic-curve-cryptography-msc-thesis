@@ -1,0 +1,145 @@
+% !TEX root = ../ecc.tex
+
+%TODO define smoothness and genus
+%TODO state Riemann-Roch, perhaps explain Weierstrass form isomorphism in more detail
+
+%XXX more general: http://en.wikipedia.org/wiki/Genus%E2%80%93degree_formula
+
+%TODO ease into definition
+
+%An \emph{elliptic curve} over $K$ is a smooth, projective curve of genus one over $K$ with a distinguished $K$-rational point, called the \emph{base point} \citep{Silverman}.
+
+%TODO discriminant. j-invariant. invariant differential?
+
+In this chapter, we cover the background on elliptic curves needed throughout the rest of the thesis. Our exposition borrows heavily from the books \citep{Silverman,Washington}, as well as the lecture notes \citep{Sutherland}.
+
+%\begin{dfn}{}{}
+%An \emph{elliptic curve} over $K$ is the projective closure of a smooth affine plane curve
+%\begin{eqn}{}
+%E : y^2 + a_1 xy + a_3 y = x^3 + a_2 x^2 + a_4 x + a_6
+%\end{eqn}
+%over $K$.
+%\end{dfn}
+
+%\chp{Elliptic and hyperelliptic curves}
+
+%\sec{Elliptic curves}
+
+
+
+
+%TODO weil pairing, det \psi_\ell = deg \psi
+
+
+
+%\begin{lem}{}{}
+%The degree of a non-zero morphism $\alpha \defeq (\alpha_{x; 1} / \alpha_{x; 2}, \alpha_y y) \in Mor(E, E')$, where $\alpha_{x; 1}, \alpha_{x; 2} \in K[x]$ are relatively prime and $\alpha_y \in K(x)$ is given by $\deg \alpha = \max(\deg \alpha_{x; 1}, \deg \alpha_{x; 2})$.
+
+%TODO torsion subgroups
+%TODO endomorphisms/isogenies, characteristic polynomial of frobenius endomorphism
+%TODO hasse's theorem
+%TODO can do edwards curves, they are smooth completions of smooth affine curves, there are two points at infinity whose blow-ups are four points defined over k(\sqrt(d)), where d is assumed to be a quadratic non-residue
+
+%TODO Every smooth affine curve over a perfect field $K$ is birationally equivalent to a unique (up to isomorphism) smooth projective curve over $K$, which is called its \emph{smooth completion}.
+
+
+%\begin{dfn}{}{}
+%The \emph{$j$-invariant} of an elliptic curve in short Weierstrass form is the quantity
+%\begin{eqn}{}
+%j(E) \defeq
+%\begin{cases}
+%0 & \textnormal{if $\rchar(K) = 2$ and $a_1 = 0$} \\
+%1 / a_6 & \textnormal{if $\rchar(K) = 2$ and $a_1 = 1$} \\
+%%a_2^2 a_4^2 - a_2^3 a_6 - a_4^3 & \textnormal{if $\rchar(K) = 3$} \\
+%1728 \frac{4a_4^3}{4 a_4^3 + 27a_6^2} & \textnormal{if $\rchar(K) \neq 2, 3$}.
+%\end{cases}
+%\end{eqn}
+
+%Note that the $j$-invariant of an elliptic curve is well-defined, since the denominator in its formula is a constant multiple of the discriminant.
+
+%TODO show j-invariant preserves kbar isomorphism
+%TODO show that elliptic curves of each j-invariant arise
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\iffalse
+
+\begin{dfn}{}{}
+A \emph{hyperelliptic curve} of genus $g$ over $K$ is the smooth completion of a smooth affine plane curve
+\begin{eqn}{}
+H : y^2 + h y = f
+\end{eqn}
+over $K$, where $h \in K[x]$ is of degree at most $g$ and $f \in K[x]$ is monic of degree $2g + 1$. An \emph{elliptic curve} is a hyperelliptic curve of genus one.
+\end{dfn}
+
+
+It is clear that the line at infinity of $H$ consists of the single point $(0 : 1 : 0)$, which we denote $\ptinfty$. Furthermore, $\ptinfty$ is a singular point if and only if $g > 1$, so that elliptic curves are the only smooth hyperelliptic curves.
+
+
+\begin{lem}{}{}
+The polynomial $y^2 + h y - f$ is irreducible over $\al{K}$, so that $H$ is in fact a variety.
+\end{lem}
+
+%TODO discriminant, maybe only elliptic curves
+
+
+If $\rchar(K) \neq 2$, then the isomorphism
+\begin{eqn}{}
+(x, y) \mapsto (x, y - h(x) / 2)
+\end{eqn}
+transforms $H$ to the simpler form
+\begin{eqn}{}
+H : y^2 = f,
+\end{eqn}
+where $f \in K[x]$ is monic of degree $2g + 1$.
+
+
+The \emph{hyperelliptic involution} of $H$ is the automorphism
+\begin{eqn}{}
+\iota : (x, y) \mapsto (x, -y - h(x)).
+\end{eqn}
+
+\sbs{Regular and rational functions}
+
+A regular function $r \in K[H]$ has a canonical representation of the form
+\begin{eqn}{}
+r = r_x + r_y y,
+\end{eqn}
+where $r_x, r_y \in K[x]$. To reduce a regular function $r$ to this form, we repeatedly replace a factor $y^2$ in every term of $r$ with such a factor by $f - hy$, until no such terms remain.
+
+\fi
+
+%The \emph{conjugate} of a regular function $r \defeq r_x + r_y y$ is the regular function $\overline{r} \defeq r \circ \iota = r_x - r_y(y + h)$
+
+%The \emph{norm} of a regular function $r \in K[H]$ is the regular function $N(r) \defeq r \overline{r}$

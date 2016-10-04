@@ -1,0 +1,27 @@
+% !TEX root = ../ecc.tex
+
+Suppose two parties, Alice and Bob, wish to communicate with each other securely over a public network. This is the type of problem which is solved by algorithms in the realm of \emph{public-key cryptography}, where each party selects both a \emph{secret key}, which they don't publish, as well as a corresponding \emph{public key}, which they send to the other party over the public network.
+
+In this chapter we describe a number of public-key cryptosystems based on group varieties for which the Diffie-Hellman problem is assumed to be hard, and hence the discrete logarithm problem is also assumed to be hard. In particular, the reader should keep in mind the case of an elliptic curve over a finite field. Multiplicative groups of finite fields are also still widely used in practice.
+
+Henceforth we will assume that Alice and Bob have publicly agreed on a tuple of values $(V, G, \ell, H)$, where $V / \Fq$ is a group variety, $G$ is an $\Fq$-point of order $\ell$ of $V$, and
+\[H : \msgs \times V \to \F_\ell\]
+is a cryptographic hash function. The contents of this tuple are sometimes referred to as the \emph{system parameters}, whereas Alice and Bob's public keys are known as the \emph{user parameters}.
+
+When $V$ is an elliptic curve, the system parameters $G$ and $\ell$ may be chosen efficiently using repeated sampling if the number of $\Fq$-points on the curve is known. As described in \cref{sec:schoof}, Schoof's algorithm may be used to count the number of $\Fq$-points efficiently in this case.
+
+In practice, the hash function $H$ is often constructed from a general-purpose cryptographic hash function $\msgs \to \set{0, 1}^k$, where $k > \log_2 \ell$. We then simply define $H(m, P)$ as the result of applying this hash function to the concatenation of $m$ and the bit-string representation of $P$, reduced modulo $\ell$.
+
+Note that the default hash function in Sage only has a codomain of 64 bits, and is not designed to be cryptographically secure. Furthermore, the default random number generator is also not cryptographically secure. The following code replaces the default functions \texttt{hash} and \texttt{randint} with cryptographically secure versions. The hash function has a codomain of 512 bits, which is more than sufficient for values of $\ell$ currently used in applications.
+
+\begin{sagecode}
+from Crypto.Hash import SHA512
+from Crypto.Random import random
+
+def hash(m):
+    return ZZ(SHA512.new(str(m)).hexdigest(), 16)
+
+def randint(a, b):
+    return ZZ(random.randint(int(a), int(b)))
+\end{sagecode}
+%TODO curve gen

@@ -1,0 +1,122 @@
+In this section we focus specifically on the elliptic curve discrete logarithm problem. We describe two pairing-based approaches for solving the discrete logarithm problem on a subgroup $\langle G \rangle$ of order $\ell$ of an elliptic curve group $E(\Fq)$ -- one using the $\ell$-th Weil pairing on $E$, and one using the $\ell$-th Tate pairing.
+
+\sbs{The MOV reduction}{}
+
+The approach using the Weil pairing was first published in \citep{MOV}, and it has come to be known as the \emph{MOV reduction} after its authors.
+
+To use the $\ell$-th Weil pairing, it will be necessary that $\ell \neq p$. However, in the case $\ell = p$, we will usually be able to use the reduction described in the next section, which solves the discrete logarithm problem with time complexity polynomial in $\log q$.
+
+\begin{lem}{}{weil_iso}
+Let $P, Q \in E[\ell]$ be points of order $\ell$ such that $E[\ell] = \langle P, Q \rangle$. Then
+\begin{eqn}{}
+\langle P \rangle \to \un{\bar{\F}_q}[\ell], \quad R \mapsto e_\ell(R, Q)
+\end{eqn}
+is an isomorphism of groups.
+\end{lem}
+\begin{proof}
+The map in question is clearly a morphism of groups by bilinearity of the Weil pairing. To see that it is an epimorphism, observe that if $e_\ell(R, Q) = e_\ell(S, Q)$ then $e_\ell(R - S, Q) = 1$. Furthermore, since $R - S \in \langle P \rangle$, it follows that $e_\ell(R - S, P) = e_\ell(P, P) = 1$ so that $R = S$ by non-degeneracy of the Weil pairing. The result follows since the domain $\langle P \rangle$ and codomain $\un{\bar{\F}_q}[\ell]$ of the morphism both have order $\ell$.
+\end{proof}
+
+Let $Q \in E[\ell]$ be a point of order $\ell$ such that $Q \notin \langle G \rangle$. Using the isomorphism from \cref{lem:weil_iso}, we may transfer the discrete logarithm problem on $\langle G \rangle$ to a discrete logarithm problem on $\un{\bar{\F}_q}[\ell]$. Concretely, for $P \in \langle G \rangle$, we compute $\log_G P = \log_{e_\ell(G, Q)} e_\ell(P, Q)$.
+
+To analyse the time complexity of this reduction, we first need to determine the smallest integer $d$ such that $E[\ell] \leq E(\F_{q^d})$. We state the following partial solution due to \citep{BalaKob}.
+
+\begin{thm}{}{}
+If $\ell \mid \#E(\Fq)$ and $\ell \nmid q - 1$, then $E[\ell] \leq E(\F_{q^d})$ if and only if $\ell \mid (q^d - 1)$.
+\end{thm}
+
+This result assures us that if $\ell$-torsion embedding degree $d \defeq d_{\un{\Fq};\ell}$ of $\Fq$ is not equal to one, then $E[\ell] \leq E(\F_{q^d})$, where $d$ is the smallest integer with this property. In the remainder of this section, we assume $\ell \nmid q - 1$. The reduction presented in the next section will deal with the $\ell \mid q - 1$ case.
+
+In order to compute the reduction, we must first find a $\F_{q^d}$-point $Q$ of order $\ell$ such that $e_\ell(G, Q) \neq 1$. This can be done by repeatedly selecting $Q \in E(\F_{q^d})[\ell]$ at random and computing $e_\ell(G, Q)$ to test the condition. Since $E(\F_{q^d})[\ell]$ is a $\Zmod{\ell}$-module of rank two, $e_\ell(G, Q) \neq 1$ for any $Q \notin \langle G \rangle$, so that the probability of selecting an appropriate $Q$ is $1 - 1 / \ell$ and we only need to sample $\Theta(1)$ points on average.
+
+Assuming that $\#E(\F_{q^d})$ is known, we may sample from $E(\F_{q^d})[\ell]$ by first randomly selecting $R \in E(\F_{q^d})$, then multiplying $R$ by an appropriate constant to obtain $Q \in E(\F_{q^d})[\ell]$. To this end, we first determine the largest $m \mid \#E(\F_{q^d})$ such that $\ell \nmid m$ by repeated division. We then compute $[m \ell^0] R, [m \ell^1] R, \ldots$ until an element $Q \in E(\F_{q^d})[\ell]$ is encountered. Thus, we can sample a point $Q \in E(\F_{q^d})[\ell]$ with a time complexity of $\Theta(d \log q)$ operations in $\F_{q^d}$, which then also gives the expected time complexity of finding a point such that $e_\ell(G, Q) \neq 1$.
+
+Using an index calculus algorithm, one may solve the discrete logarithm problem in $\un{\F_{q^d}}[\ell]$ with a time complexity of $L_{q^d}\lbrack 1/3, c \rbrack$, clearly dominating the time complexity of the reduction. Thus, the MOV reduction will yield an algorithm with time complexity subexponential in $\log q$ if and only if $d \in o((\log q / \log\log q)^2)$. In particular, if $d \in O(1)$, this yields a $L_q\lbrack 1/3, c \rbrack$ algorithm for the elliptic curve discrete logarithm problem.
+
+A Sage implementation of the MOV reduction is given in \cref{alg:mov}. Note that at the time of writing, Sage does not include an implementation of an index calculus algorithm for solving discrete logarithms in finite fields, so this code will not be efficient in large cases until such an implementation is included.
+
+\begin{alg}{MOV reduction}{mov}
+\begin{sagecode}
+def mov_reduction(G, P, l, E, n):
+    """
+    G: a point on E of prime order
+    P: a multiple of G
+    l: the order of G
+    E: an elliptic curve
+    n: the order of E
+    """
+    m = n
+    while m % l == 0:
+        m //= l
+    g = 1
+    while g == 1:
+        Q = E.random_point() * m
+        while Q * l != 0:
+            Q *= l
+        g = weil_pairing(E, l, G, Q)
+    p = weil_pairing(E, l, P, Q)
+    return p.log(g)
+\end{sagecode}
+\end{alg}
+
+It is worth mentioning two important results from the literature regarding the MOV reduction.
+
+It was shown in \citep{MOV} that if $E / \Fq$ is a supersingular elliptic curve, then for every $\ell \mid \#E(\Fq)$, $E[\ell] \leq E(\F_{q^d})$ for some $d = 1, \ldots, 6$, so that the discrete logarithm problem on $E(\Fq)$ is at least as easy as the discrete logarithm problem on $\F_{q^6}$. This rendered an entire class of elliptic curves unsuitable for use in discrete logarithm cryptosystems.
+
+However, \citep{BalaKob} showed that it is exceptionally rare for a randomly selected pair of prime numbers $p$ and $\ell$ such that $\ell \in [p+1-2\sqrt{p}, p+1+2\sqrt{p}]$ and $d_{\un{\Fp};\ell} \neq 1$ to satisfy the condition $d_{\un{\Fp};\ell} \in o((\log \ell / \log\log \ell)^2)$. Thus, the MOV reduction is necessarily inefficient for an elliptic curve with $\#E(\Fp) = \ell$ using present state-of-the-art techniques for solving discrete logarithms in multiplicative groups of finite fields.
+
+%TODO cite MOV paper, easy to show using frobenius endomorphism characteristic equation, http://people.cs.nctu.edu.tw/~rjchen/ECC2009/19_MOVattack.pdf
+
+\sbs{The Frey-R\"uck reduction}{}
+
+Using the Tate pairing, we may perform another reduction similar to the MOV reduction of the previous section. This reduction was first published in \citep{FreyRuck} and is known as the \emph{Frey-R\"uck reduction} after its authors. As with the MOV reduction, we require that that $\ell \neq p$, but unlike the MOV reduction, we can find an isomorphism using the $\ell$-th Tate pairing without the assumption $\ell \nmid q - 1$. For the remainder of the section, let $d \defeq d_{\un{\Fq},\ell}$.
+
+\begin{dfn}{}{mod_tate}
+For a prime number $\ell$ such that $\ell \neq p$, the \emph{modified $\ell$-th Tate pairing} on $E$ is the mapping
+\begin{eqn}{}
+\tau_m : E(\F_{q^d})[\ell] \times E(\F_{q^d}) / [\ell] E(\F_{q^d}) \to \un{\F_{q^d}}[\ell]
+\end{eqn}
+defined by $\tau_\ell(P, [Q]) \defeq t_\ell(P, [Q])^{(q^d - 1) / \ell}$ for all $P \in E(\F_{q^d})[\ell]$ and $Q \in E(\F_{q^d})$.
+\end{dfn}
+
+Note that the map
+\[\un{\F_{q^d}} / [\ell] \un{\F_{q^d}} \to \un{\F_{q^d}}[\ell], \quad [t] \mapsto t^{(q^d - 1) / \ell}\]
+is a well-defined isomorphism of groups, since its kernel is exactly the coset $[\ell] \un{\F_{q^d}}$, while its domain and codomain are both groups of order $\ell$. Therefore, the modified Tate pairing enjoys all of the same properties as the usual Tate pairing, with the practical advantage that evaluations of the modified Tate pairing can easily be checked for equality. However, the exponentiation step requires $\Theta(d \log q)$ operations in $\F_{q^d}$, thus dominating the time complexity of computing the modified Tate pairing, since the usual Tate pairing has a time complexity of $\Theta(\log \ell)$ and clearly $\ell \in O(q^d)$.
+
+\begin{lem}{}{tate_iso}
+Let $P \in E(\F_{q^d})[\ell]$ be a point of order $\ell$. Then there exists a point $Q \in E(\F_{q^d})$ such that
+\begin{eqn}{}
+\langle P \rangle \to \un{\F_{q^d}}[\ell], \quad R \mapsto \tau_\ell(R, [Q])^{(q^d - 1) / \ell}
+\end{eqn}
+is an isomorphism of groups.
+\end{lem}
+\begin{proof}
+By bilinearity of the modified Tate pairing, the map is clearly a morphism of groups. Since $P \neq \ptinfty$, there exists a point $Q \in E(\F_{q^d})$ such that $\tau_\ell(P, [Q]) \neq 1$ by non-degeneracy of the modified Tate pairing. Then $\un{\F_{q^d}}[\ell]$ is generated by $\tau_\ell(P, [Q])$ since it is a group of prime order, from which it follows that the morphism is an epimorphism, and hence an isomorphism since its domain and codomain both have order $\ell$.
+\end{proof}
+
+Let $Q \in E(\F_{q^d})$ be a point such that $\tau_\ell(G, Q) \neq 1$. Similarly to the MOV reduction, we may reduce the computation of the discrete logarithm $\log_G P$ for $P \in \langle G \rangle$ to the discrete logarithm $\log_{\tau_\ell(G, Q)} \tau_\ell(P, Q)$ in $\un{\F_{q^d}}[\ell]$.
+
+While \cref{lem:tate_iso} guarantees the existence of an isomorphism, it does not give an indication of how many points $Q \in E(\F_{q^d})$ will yield such an isomorphism. However, by observing that $E(\F_{q^d}) / [\ell] E(\F_{q^d})$ is a $\Zmod{\ell}$-module of rank either one or two due to the structure of $E(\F_{q^d})$ described in \cref{cor:ell_struct}, we see that such points are always common. Indeed, in the first case any point $Q \in E(\F_{q^d}) \setminus \set{\ptinfty}$ will suffice, while in the second case the probabilistic approach used for the MOV reduction may be applied.
+
+Repeatedly sampling $Q \in E(\F_{q^d})$ and computing $\tau_\ell(G, Q)$ to test the condition $\tau_\ell(G, Q) \neq 1$ yields a desired point with an expected time complexity of $\Theta(q \log d)$ operations in $\F_{q^d}$. Once again, an index calculus algorithm may be used to solve the discrete logarithm in $\un{\F_{q^d}}[\ell]$, for a time complexity dominated by $L_{q^d}\lbrack 1/3, c \rbrack$. Sage code implementing the Frey-R\"uck reduction is given in \cref{alg:fr}.
+
+\begin{alg}{Frey-R\"uck reduction}{fr}
+\begin{sagecode}
+def frey_ruck_reduction(G, P, l, E):
+    """
+    G: a point on E of prime order
+    P: a multiple of G
+    l: the order of G
+    E: an elliptic curve
+    """
+    q = E.base_field().order()
+    g = 1
+    while g == 1:
+        Q = E.random_point()
+        g = tate_pairing(E, l, G, Q)^((q - 1) // l)
+    p = tate_pairing(E, l, P, Q)^((q - 1) // l)
+    return p.log(g)
+\end{sagecode}
+\end{alg}
+
+It is worth drawing a comparison between the Frey-R\"uck reduction and the MOV reduction. Firstly, practical implementations of the modified Tate pairing are often faster than those for the Weil pairing when the embedding degree $d$ is small, since they usually only require one evaluation of Miller's algorithm, whereas the Weil pairing always requires two. However, when $d$ is large, the exponentiation by $(q^d - 1) / \ell$ in computing the modified Tate pairing may result in it actually being outperformed by the Weil pairing. Another advantage of the Frey-R\"uck reduction is that when searching for a point $Q$ that yields an isomorphism, we may directly use a point sampled from $E(\F_{q^d})$ to compute the modified Tate pairing, whereas the MOV reduction requires first multiplying such a point by some constant in $O(q^d)$ to transform it into a point in $E(\F_{q^d})[\ell]$, which usually exceeds the cost of exponentiation in the modified Tate pairing. A situation where the Frey-R\"uck reduction is always more appropriate is when $d = 1$, since the Weil pairing may require working over a much larger extension field of $\Fq$ in this case.

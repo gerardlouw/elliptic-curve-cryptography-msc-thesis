@@ -1,0 +1,18 @@
+All of the cryptosystems introduced in this chapter will use the same approach for generating a pair of secret and public keys, which we call \emph{Diffie-Hellman key generation}.
+
+For this approach, each party selects a random element $s \in \F_\ell$ to use as their secret key. They then calculate the point multiplication $K \defeq [s] G$, which they use as their public key. We will use $(s_A, K_A)$ and $(s_B, K_B)$ to denote Alice and Bob's key pairs respectively. \cref{alg:keygen} gives Sage code for generating a key pair from the system parameters in this way.
+
+\begin{alg}{Diffie-Hellman key generation}{keygen}
+\begin{sagecode}
+def diffie_hellman_key_generation(G, l):
+    """
+    M: the base point
+    l: the order of G
+    """
+    s = randint(0, l - 1)
+    K = s * G
+    return s, K
+\end{sagecode}
+\end{alg}
+
+Note that given knowledge of the system parameters and a public key $K$, the problem of deriving the matching secret key $s$ is an instance of the discrete logarithm problem, which we have assumed to be difficult. This is clearly a desirable property for a key pair to have.

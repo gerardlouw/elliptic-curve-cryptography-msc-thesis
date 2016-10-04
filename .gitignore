@@ -1,0 +1,15 @@
+latex/ecc.aux
+latex/ecc.lof
+latex/ecc.log
+latex/ecc.lot
+latex/ecc.out
+latex/ecc.pdf
+latex/ecc.sagetex.*
+latex/ecc.toc
+latex/ecc.bbl
+latex/ecc.blg
+latex/ecc.loa
+latex/commands/*.aux
+latex/_minted-ecc
+latex/sage-plots-for-ecc.tex
+sage/test.sage.py

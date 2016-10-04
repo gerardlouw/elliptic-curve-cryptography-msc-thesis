@@ -1,0 +1,106 @@
+\sbs{Multiplication-by-$m$ endomorphisms}{}
+
+\begin{dfn}{}{}
+For $m \in \Z$, the \emph{multiplication-by-$m$ endomorphism} of $E$ is defined recursively as
+\begin{eqn}{}
+[m] \defeq
+\begin{cases}
+(0 : 1 : 0) & \text{if $m = 0$} \\
+(x, y) & \text{if $m = 1$} \\
+[m - 1] + [1] & \text{if $m > 1$} \\
+-[-m] & \text{if $m < 0$}
+\end{cases}
+\end{eqn}
+\end{dfn}
+
+Note that $\ker [m] = E[m]$, the \emph{$m$-torsion subgroup} of $E$. For a point $P \in E(L)$, the point multiplication $[m] P$ may be calculated with a time complexity of $\Theta(\log m)$ operations in $L$ using a double-and-add algorithm.
+
+\sbs{Division polynomials}{}
+
+\begin{dfn}{}{}
+For $m \in \Z$ the \emph{$m$-th division polynomial} of $E$ is the regular function $\psi_m \in K[E]$ defined recursively as \citep{Washington}
+\begin{align*}
+\psi_0 &\defeq 0 \\
+\psi_1 &\defeq 1 \\
+\psi_2 &\defeq 2y \\
+\psi_3 &\defeq 3x^4 + 6a_4x^2 + 12a_6x - a_4^2 \\
+\psi_4 &\defeq 4y(x^6 + 5a_4x^5 + 20 a_6x^3 - 5a_4^2x^2 - 4a_4a_6x - a_4^3 - 8a_6^2) \\
+\psi_{2m - 1} &\defeq \psi_{m-1}^3 \psi_{m+1} - \psi_{m-2} \psi_m^3 \text{ for $m \geq 3$} \\
+\psi_{2m} &\defeq \frac{\psi_m}{2y}(\psi_{m-1}^2\psi_{m+2} - \psi_{m-2}\psi_{m+1}^2) \text{ for $m \geq 3$} \\
+\psi_m &\defeq -\psi_{-m} \text{ for $m < 0$}.
+\end{align*}
+\end{dfn}
+
+Putting $\psi_m$ in canonical form, a straightforward inductive argument shows that if $m$ is odd then $\psi_m \in K[x]$ has the leading term $m x^{(m^2 - 1) / 2}$, and if $m$ is even then $\psi_m / y \in K[x]$ has the leading term $m x^{(m^2 - 4) / 2}$.
+
+The division polynomials satisfy the following essential property.
+
+\begin{thm}{}{mult_m}
+For $m \neq 0$, the multiplication-by-$m$ endomorphism has the form
+\begin{eqn}{}
+[m] = \left(\frac{x \psi_m^2 - \psi_{m-1}\psi_{m+1}}{\psi_m^2}, \frac{\psi_{m-1}^2\psi_{m+2} - \psi_{m-2}\psi_{m+1}^2}{4 \psi_m^3 y} \right).
+\end{eqn}
+\end{thm}
+
+There exist completely elementary inductive proofs of this statement involving messy calculations. A neater proof is given in Theorem~9.33 of \citep{Washington}, which involves first demonstrating the result in characteristic zero using complex analytic techniques, then extending it to arbitrary fields by showing that it is preserved by reduction to characteristic $p$.
+
+Furthermore, one may show that $x \psi_m^2 - \psi_{m-1}\psi_{m+1}$ and $\psi_m^2$ are relatively prime when reduced to their canonical representations in  $K[x]$. This allows us to apply the criteria in \cref{thm:iso_crit} to this representation of $[m]$, immediately yielding the following corollary.
+
+\begin{cor}{}{}
+If $\rchar(K) \nmid m$, then $\psi_m(x, y) = 0$ if and only if $(x, y) \in E[m]$.
+\end{cor}
+
+Furthermore, using the representation in \cref{thm:mult_m} allows us to determine the degree of $[m]$, and under certain conditions decide whether it is separable.
+
+\begin{thm}{}{mul_prop}
+The multiplication-by-$m$ endomorphism has degree $m^2$, and if $\rchar(K) \nmid m$ then $[m]$ is separable.
+\end{thm}
+\begin{proof}
+This follows easily from \cref{thm:iso_crit}. Each term of the numerator $x \psi_m^2 - \psi_{m-1}\psi_{m+1}$ of $[m]_x$ is of degree $m^2$, with leading coefficients $m^2$ and $m^2 - 1$ respectively, so that the numerator is monic of degree $m^2$. The leading term of the denominator $\psi_m^2$ of $[m]_x$ is $m^2 x^{m^2 - 1}$, and hence $\deg[m] = m^2$. If $\rchar(K) = p$ and $p \nmid m$, then clearly $[m]_x \notin K(x^p)$, since the leading term of its numerator is $x^{m^2}$, so that $[m]$ is separable.
+%TODO converse
+\end{proof}
+
+\begin{rmk}{}{}
+The converse of the separability criterion in \cref{thm:mul_prop} is also true, but we will not need this result.
+\end{rmk}
+
+%This result gives us an embedding $\Z \hookrightarrow \End(E)$ so that $\End(E)$ has characteristic zero, since it is immediate that $[m] \neq [0]$ for any $m \neq 0$.
+
+\sbs{Structure of $m$-torsion subgroups}{}
+
+\begin{thm}{}{tors_struct}
+If $\rchar(K) \nmid m$ then the $m$-torsion subgroup $E[m]$ of $E$ is a free $\Zmod{m}$-module of rank two.% if $\rchar(K) \nmid m$, or rank at most one if $\rchar(K) \mid m$.
+\end{thm}
+\begin{proof}
+We give a distilled version of the proof to Theorem~3.2 of \citep{Washington}. Since $E[m] = \ker[m]$ is a finite abelian group of order $\deg[m] = m^2$, there is an isomorphism
+\begin{eqn}{}
+E[m] \cong \Zmod{m_1} \times \cdots \times \Zmod{m_k}
+\end{eqn}
+for some $m_1, \ldots, m_k \in \N$ such that $m_1 \neq 1$, $m_1 \mid \cdots \mid m_k$ and $m_1 \cdots m_k = m^2$. Since $m_1 \mid m_i$ for $i = 1, \ldots, k$, $E[m]$ contains a subgroup isomorphic to $(\Zmod{m_1})^k$, which forces $k \leq 2$, since $\#E[m_1] = m_1^2$. Furthermore $m_k \mid m$ since $E[m]$ comprises elements of order dividing $m$. It follows that $m_1 = m_2 = m$, so that $E[m] \cong \Zmod{m} \times \Zmod{m}$.
+\end{proof}
+
+At this point, counting roots shows that canonical representation of $\psi_m$ is in fact the polynomial in $K[x, y]$ of minimal degree with the property that its zeros are the affine $m$-torsion points, since each root of $\psi_m$ (when $m$ is even) or $\psi_m / y$ (when $m$ is odd) must be the $x$-coordinate of a pair of points in $E[m]$, while the factor $y$ accounts for the three points of order two when $m$ is even.
+
+\begin{cor}{}{ell_struct}
+If $K = \Fq$ is a finite field of characteristic not dividing $\#E(\Fq)$, then $E(\Fq) = \langle P, Q \rangle$ for some $P, Q \in E(\Fq)$.
+\end{cor}
+\begin{proof}
+Let $n \defeq \#E(\Fq)$. Note that $E(\Fq) \leq E[n]$, so that the result follows immediately from \cref{thm:tors_struct}, since $E(\Fq) \cong \Zmod{n_1} \times \Zmod{n_2}$ for some positive integers $n_1$ and $n_2$ such that $n_1n_2 = n$.
+\end{proof}
+
+%It can be shown that $[m] \neq [0]$ for $m \neq 0$, which immediately establishes that the endomorphism ring $\End(E)$ of $E$ has characteristic zero \citep{Silverman}.
+
+%\begin{dfn}{}{}
+%An elliptic curve in characteristic $p$ is called \emph{supersingular} if and only if $E[p] \cong 0$.
+%\end{dfn}
+
+%TODO simple test by mod p
+%TODO supersingular curves have small embedding degree, MOV paper
+
+%\begin{dfn}{}{}
+%For any prime number $\ell$, the \emph{$\ell$-adic Tate module} of $E$ is the free $\Z_\ell$-module obtained by taking the inverse limit
+%\begin{eqn}{}
+%T_\ell(E) \defeq \varprojlim E[\ell^n],
+%\end{eqn}
+%which is of rank two if $\rchar(K) \neq \ell$ and rank at most one otherwise.
+%\end{dfn}

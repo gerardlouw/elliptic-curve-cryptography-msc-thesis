@@ -1,0 +1,28 @@
+\begin{thm}{}{}
+Let $E / \Fq$ be an elliptic curve, then
+\[
+\#E(\Fq) = q + 1 - \tr \phi_q.
+\]
+\end{thm}
+\begin{proof}
+From \cref{dfn:trace} we have \[\tr\phi_q \defeq 1 + \deg \phi_q - \deg([1] - \phi_q) = 1 + q - \#E(\Fq),\] since $\deg([1] - \phi_q) = \#E(\Fq)$ by \cref{thm:one_min_frob_prop}.
+\end{proof}
+
+\begin{thm}{Hasse}{hasse}
+Let $E / \Fq$ be an elliptic curve, then
+\[
+\left|\tr \phi_q\right| \leq 2\sqrt{q}.
+\]
+\end{thm}
+\begin{proof}
+Let $t \defeq \tr \phi_q$ and recall $\deg \phi_q = q$ from \cref{thm:frob_prop}. Then
+\begin{align*}
+([t] \hat{\phi}_q - [2q]) ([t] \phi_q - [2q]) &= [t]^2 \hat{\phi}_q \phi_q - [t] [2q] (\hat{\phi}_q + \phi_q) + [2q]^2 \\
+&= [t]^2[q] - [t]^2[2q] + [2q]^2,
+\end{align*}
+so that $\deg([t] \phi_q - [2q]) = 4q^2 - t^2q = q(4q - t^2)$. Since degrees are non-negative, this means $4 q - t^2 \geq 0$, or equivalently $\left|t\right| \leq \sqrt{2q}$.
+\end{proof}
+
+As an immediate consequence of Hasse's theorem, we have the asymptotic relationship $\#E(\Fq) \sim q$. This will be useful when studying the time complexity of certain algorithms for elliptic curves.
+
+It can be shown that the bound given by Hasse's theorem is tight. In fact, for each $t \in \Z$ such that $|t| \leq 2\sqrt{q}$, there exists an elliptic curve $E / \Fq$ with $\#E(\Fq) = q + 1 - t$.

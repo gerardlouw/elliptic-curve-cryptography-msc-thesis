@@ -1,0 +1,93 @@
+\sbs{Pollard's $\rho$ algorithm}{rho}
+
+\emph{Pollard's $\rho$ algorithm} is a probabilistic algorithm of Las Vegas type due to \citep{Pollard} for solving general discrete logarithm problems, with a favourable expected time complexity, and constant space complexity. The algorithm relies on finding collisions of the form $[a]G + [b]P = [a']G + [b']P$, so that $[a - a'] G = [b' - b] P$. If $b \not\equiv b' \pmod{\ell}$, we may then determine $\log_G P = (a - a') (b' - b)^{-1}$, where arithmetic is performed in $\F_\ell$.
+
+In order to find collisions, we would like to repeatedly sample elements of the form $[a]G + [b]P$ randomly from $\langle G \rangle$. A standard statistical argument in the style of the \emph{birthday paradox} shows that the expected number of samples needed before finding a collision is asymptotically equal to $\sqrt{\frac{\pi}{2} \ell}$ \citep{Galbraith}. However, if we store all of the sample elements while searching for a collision, this approach has no better space complexity than the baby-step giant-step algorithm.
+
+To avoid storing the sample elements, we wish to find a deterministic function $f_{G, P} : \langle G \rangle \to \langle G \rangle$ which behaves sufficiently randomly. That is, such that if $Q_0 \in \langle G \rangle$ is randomly selected, then the sequence defined by $Q_{i+1} \defeq f_{G, P}(Q_i)$ will enter a cycle after an expected number of approximately $\sqrt{\frac{\pi}{2} \ell}$ steps. Furthermore, we would like $f_{G, P}$ to have the property that if $a_i, b_i$ are known such that $Q_i = [a_i]G + [b_i]P$, then it is easy to determine $a_{i+1}, b_{i+1}$ such that $Q_{i+1} = [a_{i+1}]G + [b_{i+1}]P$.
+
+Using \emph{Floyd's cycle-finding algorithm}, a collision can then be detected after an expected number of approximately $3 \sqrt{\frac{\pi}{2} \ell}$ function evaluations as follows \citep{Floyd}. We initially select $a_0, b_0 \in \Zmodn$ at random and compute $Q_0 = [a_0] G + [b_0] P$. For $i = 1, 2, \ldots$, we then compute $Q_i$ and $Q_{2i}$ from $Q_{i-1}$ and $Q_{2(i-1)}$ by applying $f_{G, P}$ and $f_{G, P} \circ f_{G, P}$ respectively.
+
+It is possible that, after finding a collision $Q_i = Q_{2i}$, we in fact have $b_i \equiv b_{2i} \pmod{\ell}$. However, this is an unlikely event, with a probability of $1 / \ell$ if the $b_i$'s are assumed to be uniformly distributed. In this case, we may simply restart the computation with a different choice of $a_0$ and $b_0$. Pollard's $\rho$ algorithm thus has an expected time complexity of $\Theta(\sqrt{\ell})$ point additions. Furthermore, it is clear that it has a space complexity of $\Theta(1)$ points.
+
+In practice, the following choice for the function $f_{G, P}$ is popular, due to its good heuristic properties. Let $m$ be a fixed positive integer, and randomly select two vectors $A$ and $B$ over $\F_\ell$ of length $m$. Let $H : \langle G \rangle \to \set{0, \ldots, m - 1}$ be a hash function. We then set $f_{G, P} (Q_i) \defeq Q_i + [A_{H(Q_i)}] G + [B_{H(Q_i)}] P$, so that $a_{i+1} = a_i + A_{H(Q_i)}$ and $b_{i+1} = b_i + B_{H(Q_i)}$ may be easily determined. Sage code implementing Pollard's $\rho$ algorithm with this choice of $f_{G, P}$ is given in \cref{alg:pollard_rho}.
+
+\begin{alg}{Pollard's $\rho$}{pollard_rho}
+\begin{sagecode}
+def pollard_rho(G, P, l, m=20):
+    """
+    G: a point of prime order
+    P: a multiple of G
+    l: the order of G
+    """
+    A, B = random_matrix(GF(l), 2, m)
+    def f(Q, a, b):
+        h = hash(Q) % m
+        return Q + ZZ(A[h]) * G + ZZ(B[h]) * P, a + A[h], b + B[h]
+    a_i, b_i = a_2i, b_2i = random_vector(GF(l), 2)
+    Q_i = Q_2i = ZZ(a_i) * G + ZZ(b_i) * P
+    for i in (1..):
+        Q_i, a_i, b_i = f(Q_i, a_i, b_i)
+        Q_2i, a_2i, b_2i = f(*f(Q_2i, a_2i, b_2i))
+        if Q_i == Q_2i:
+            if b_i != b_2i:
+                return ZZ((a_i - a_2i) / (b_2i - b_i))
+            else:
+                return pollard_rho(G, P, l)
+\end{sagecode}
+\end{alg}
+
+%TODO example of f that is used in practice
+
+\sbs{Pollard's $\lambda$ algorithm}{lambda}
+
+We now describe a variant of Pollard's $\rho$ algorithm due to \citep{ParallelPollard}, which is referred to as \emph{Pollard's $\lambda$ algorithm}, \emph{parallel Pollard's $\rho$ algorithm}, and \emph{Pollard's $\rho$ algorithm with distinguished points} in the literature. A \emph{distinguished point} is a point $Q \in \langle G \rangle$ which satisfies some chosen property $D$ that can be checked efficiently. We denote $\theta \defeq \#\set{Q \in \langle G \rangle : D(Q)} / \ell$, so that $\theta$ is the probability that an element selected uniformly at random from $\langle G \rangle$ satisfies $D$.
+
+Reusing notation from the previous subsection, the algorithm performs pseudorandom walks in $\langle G \rangle$ by repeated application of $f_{G, P}$. However, rather than performing a single pseudorandom walk which terminates when it enters a cycle, the present algorithm performs multiple pseudorandom walks, each of which terminates when it reaches a distinguished point.
+
+Once a distinguished point $Q_i$ is found, it is stored in a lookup table, along with $a_i$ and $b_i$. However, if the lookup table already contains an entry $(Q'_j, a'_j, b'_j)$ such that $Q'_j = Q_i$, then we have found a collision with high probability. As in the previous algorithm, this will be the case if and only if $b_i \not\equiv b'_j \pmod{\ell}$, which then gives us the solution $\log_G P = (a_i - a'_j) (b'_j - b_i)^{-1}$ to the discrete logarithm problem.
+
+The key to the efficiency of Pollard's $\lambda$ algorithm is choosing a property $D$ which yields a favourable value of $\theta$. As in the analysis of Pollard's $\rho$ algorithm, the expected number of iterations of $f_{G, P}$ needed to obtain a collision is about $\sqrt{\frac{\pi}{2} \ell}$. However, the collision will only be detected once the current pseudorandom walk reaches a distinguished point. Since the expected length of a pseudorandom walk before reaching a distinguished point is $1 / \theta$, the total number of iterations of $f_{G, P}$ needed, and thus the number of point additions performed, will be roughly
+\[
+\sqrt{\frac{\pi}{2} \ell} + \frac{1}{\theta}
+\]
+
+The total number of distinguished points found among all of the walks is expected to be a fraction $\theta$ of all iterations of $f_{G, P}$, so that roughly $\theta \sqrt{\frac{\pi}{2} \ell}$ group elements will need to be stored.
+
+Selecting some function $g \in o(1)$ and letting $\theta \defeq \frac{1}{g(\ell) \sqrt{\ell}}$ thus yields an algorithm which computes an expected number of $\sqrt{\frac{\pi}{2} \ell}$ point additions, while storing $\sqrt{\frac{\pi}{2}} / g(\ell)$ points. For example, choosing $g(\ell) \defeq \frac{1}{\log \ell}$ yields a modest space complexity of $\Theta(\log \ell)$ points, while maintaining a favourable time complexity of $\Theta(\sqrt{\ell})$.
+
+A choice of property which may yield a particular value of $\theta$ in practice is to let $D(Q)$ be the property that $H(Q) = 0$, where $H : \langle G \rangle \to \Zmod{\lfloor 1 / \theta \rfloor}$ is a hash function. Sage code implementing Pollard's $\lambda$ algorithm with this choice of property is given in \cref{alg:pollard_lambda}.
+
+%TODO mention the assumption that all walks terminate in a distinguished point, or rather show that this is very likely, or add the restriction that walks terminate after sqrt(n) steps, and analyse the effect on the running time
+
+\begin{alg}{Pollard's $\lambda$}{pollard_lambda}
+\begin{sagecode}
+def pollard_lambda(G, P, l, m=20):
+    """
+    G: a point of prime order
+    P: a multiple of G
+    l: the order of G
+    """
+    A, B = random_matrix(GF(l), 2, m)
+    def f(Q, a, b):
+        h = hash(Q) % m
+        return Q + ZZ(A[h]) * G + ZZ(B[h]) * P, a + A[h], b + B[h]
+    T = {}
+    theta_inv = floor(sqrt(l) / log(l))
+    while true:
+        a_i, b_i = random_vector(GF(l), 2)
+        Q_i = ZZ(a_i) * G + ZZ(b_i) * P
+        for i in (1..):
+            Q_i, a_i, b_i = f(Q_i, a_i, b_i)
+            if hash(Q_i) % theta_inv == 0:
+                if Q_i in T:
+                    a_j, b_j = T[Q_i]
+                    if b_i != b_j:
+                        return ZZ((a_i - a_j) / (b_j - b_i))
+                else:
+                    T[Q_i] = a_i, b_i
+                    break
+\end{sagecode}
+\end{alg}
+
+A significant practical advantage of Pollard's $\lambda$ algorithm over Pollard's $\rho$ algorithm and the baby-step giant-step algorithm, is that it is trivial to convert into a parallel algorithm which runs across multiple processing units. All processing units may perform random walks simultaneously, only communicating with each other when distinguished points are found.

@@ -1,0 +1,18 @@
+% !TEX root = ../ecc.tex
+
+\begin{Nomencl}
+  \NomGroup{Objects}
+    %\item[$\Theta(f(n))$] the set of functions $g : \N \to \R_{\geq 0}$ such that $0 < \lim_{n \to \infty} \frac{f(n)}{g(n)} < \infty$ for $f : \N \to \R_{\geq 0}$
+    %\item[$L\lbrack\alpha, c\rbrack$] the set of functions $f : \N \to \R_{\geq 0}$ such that $\log(f(n)) \sim c \log(n)^\alpha \log(\log(n))^{1 - \alpha}$ for $0 \leq \alpha \leq 1$ and $c > 0$ %TODO fix this, look at Galbraith 15.1.5
+    \item[$K$] a perfect field of characteristic not 2 or 3
+    \item[$L$] an algebraic extension of $K$
+    \item[$\bar{K}$] a fixed algebraic closure of $K$
+    \item[$p$] a prime number greater than 3
+    \item[$q$] a positive power of $p$
+    \item[$\Fq$] a fixed finite field of order $q$
+    \item[$O(f(n))$] the set of functions $\set{g(n) : \liminf\limits_{n \to \infty} \frac{g(n)}{f(n)} \geq 0 \text{ and } \limsup\limits_{n \to \infty} \frac{g(n)}{f(n)} < \infty}$
+    \item[$o(f(n))$] the set of functions $\set{g(n) : \lim\limits_{n \to \infty} \frac{g(n)}{f(n)} = 0}$
+    \item[$\Theta(f(n))$] the set of functions $\set{g(n) : \liminf\limits_{n \to \infty} \frac{g(n)}{f(n)} > 0 \text{ and } \limsup\limits_{n \to \infty} \frac{g(n)}{f(n)} < \infty}$
+    \item[$\tilde{O}(f(n))$] the set of functions $\bigcup\limits_{k = 0}^\infty O(f(n) (\log f(n))^k)$
+    \item[$L_n \lbrack \alpha, c \rbrack$] the set of functions $\set{e^{(c + g(n)) (\log n)^\alpha (\log \log n)^{1 - \alpha}} : g(n) \in o(1)}$
+\end{Nomencl}

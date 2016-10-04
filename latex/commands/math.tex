@@ -1,0 +1,90 @@
+% !TEX root = ../ecc.tex
+
+\theoremstyle{plain}
+\newtheorem{theorem}{\theoremname}[chapter]
+\newtheorem{lemma}{\lemmaname}[chapter]
+\newtheorem{corollary}{\corollaryname}[chapter]
+\theoremstyle{definition}
+\newtheorem{definition}{\definitionname}[chapter]
+\newtheorem{remark}{\remarkname}[chapter]
+\newtheorem{example}{\examplename}[chapter]
+
+%general
+\newcommand{\abs}[1]{\left|#1\right|}
+\usepackage{mathtools}
+\newcommand{\defeq}{\vcentcolon=}
+\newcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil#1\right\rceil}
+
+%calculus
+\newcommand{\dd}[1]{\frac{\text{d}}{\text{d}#1}}
+\newcommand{\ddx}{\dd{x}}
+\newcommand{\ddy}{\dd{y}}
+\newcommand{\ddz}{\dd{z}}
+\newcommand{\pdd}[1]{\frac{\partial}{\partial#1}}
+\newcommand{\pddx}{\pdd{x}}
+\newcommand{\pddy}{\pdd{y}}
+\newcommand{\pddz}{\pdd{z}}
+
+%number theory
+\newcommand{\legendre}[2]{\left(\frac{#1}{#2}\right)}
+
+%algebra
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\rchar}{char}
+\DeclareMathOperator{\Frac}{Frac}
+\DeclareMathOperator{\Gal}{Gal}
+\DeclareMathOperator{\End}{End}
+\DeclareMathOperator{\tr}{tr}
+
+%\newcommand{\al}[1]{\bar{#1}}
+\newcommand{\un}[1]{#1^\times}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\N}{\mathbb{N}_0}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\Fp}{\F_p}
+\newcommand{\Fpn}{\F_{p^n}}
+\newcommand{\Fq}{\F_q}
+\newcommand{\Zmod}[1]{\Z / #1 \Z}
+\newcommand{\Zmodp}{\Zmod{p}}
+\newcommand{\Zmodn}{\Zmod{n}}
+\newcommand{\Qp}{\Q_p}
+
+%algebraic geometry
+\newcommand{\A}[1]{\mathbb{A}^{#1}}
+\DeclareMathOperator{\Spec}{Spec}
+\DeclareMathOperator{\Proj}{Proj}
+\let\div\relax
+\DeclareMathOperator{\div}{div}
+\DeclareMathOperator{\Div}{Div}
+\DeclareMathOperator{\Prin}{Prin}
+\DeclareMathOperator{\Cl}{Cl}
+\DeclareMathOperator{\Jac}{Jac}
+\DeclareMathOperator{\ord}{ord}
+
+\newcommand{\shf}{\mathscr{O}}
+
+%elliptic and hyperelliptic curves
+\newcommand{\EFp}{E(\Fp)}
+\newcommand{\EFpn}{E(\Fpn)}
+\newcommand{\EFq}{E(\Fq)}
+\newcommand{\ptinfty}{\mathcal{O}}
+
+%category theory
+\DeclareMathOperator{\res}{res}
+\DeclareMathOperator{\mor}{mor}
+\DeclareMathOperator{\codim}{codim}
+\DeclareMathOperator{\im}{im}
+\DeclareMathOperator{\Mor}{Mor}
+
+\newcommand{\cat}[1]{{\normalfont\textbf{#1}}}
+
+%complexity theory
+\newcommand{\Ln}[2]{L_n\lbrack#1,#2\rbrack}
+
+%cryptography
+\newcommand{\msgs}{\set{0, 1}^*}

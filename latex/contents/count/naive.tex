@@ -1,0 +1,9 @@
+% !TEX root = ../../ecc.tex
+
+The most naive approach for counting the number of points $\#E(\Fq)$ on an elliptic curve involves simply enumerating all pairs $(x, y) \in \Fq \times \Fq$, counting those which satisfy the Weierstrass equation $y^2 = f(x)$ of $E$, and adding one to the tally for the point at infinity. This approach has a time complexity of $O(q^2)$ field operations.
+
+We may do slightly better by only enumerating values $x \in \Fq$, computing $f(x)$, then counting one point if it is zero or two points if it is a quadratic residue modulo $\Fq$. Testing whether or not $f(x)$ is a quadratic residue involves computing the Legendre symbol $\legendre{f(x)}{\Fq}$, which may be done with $O(\log q)$ field operations. Thus, the total time complexity of this approach is $O(q \log q)$ field operations.
+
+%\sbs{Discrete logarithm}{}
+
+%Neither of the above approaches makes use of the bounds on $\#\EFq$ given by Hasse's theorem. Using knowledge of this theorem, we can develop a probabilistic approach using the algorithms in \cref{chp:dlp} for solving discrete logarithms.
